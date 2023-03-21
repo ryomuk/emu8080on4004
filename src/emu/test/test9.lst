@@ -1,0 +1,105 @@
+ AS V1.42 Beta [Bld 236] - Source File test9.asm - Page 1 - 2023/03/20 19:22:20
+
+
+       1/       0 :                     ;;; test9.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; STAX, LDAX, STA, LDA,
+       4/       0 :                     ;;; SHLD, LHLD, XTHL, XCHG, PCHL, SPHL
+       5/       0 :                     ;;; MOV REG, M, MOV M, REG, INC M, DCR M
+       6/       0 :                     
+       7/       0 :                     	
+       8/       0 :                     	CPU	8080
+       9/       0 :                     	org 0000H		;RST0
+      10/       0 :                     START:
+      11/       0 : 31 00 0F            	LXI SP, 0F00H
+      12/       3 : 21 45 03            	LXI H, 345H
+      13/       6 : 01 56 04            	LXI B, 456H
+      14/       9 : 11 67 05            	LXI D, 567H
+      15/       C :                     
+      16/       C : 3E BC               	MVI A, 0BCH
+      17/       E : 02                  	STAX B
+      18/       F : 3E DE               	MVI A, 0DEH
+      19/      11 : 12                  	STAX D
+      20/      12 :                     	
+      21/      12 : AF                  	XRA A
+      22/      13 : 0A                  	LDAX B
+      23/      14 : 1A                  	LDAX D
+      24/      15 :                     
+      25/      15 : 3E 88               	MVI A, 88H
+      26/      17 : 32 45 03            	STA 345H
+      27/      1A :                     
+      28/      1A : 36 77               	MVI M, 77H
+      29/      1C : 3A 45 03            	LDA 345H
+      30/      1F :                     
+      31/      1F : 01 00 0E            	LXI B, 0E00H
+      32/      22 : 11 01 0E            	LXI D, 0E01H
+      33/      25 :                     
+      34/      25 : 21 34 12            	LXI H, 1234H
+      35/      28 : 22 00 0E            	SHLD 0E00H
+      36/      2B :                     
+      37/      2B : 21 00 00            	LXI H, 0000H
+      38/      2E : 2A 00 0E            	LHLD 0E00H
+      39/      31 :                     
+      40/      31 : 01 78 56            	LXI B, 5678H
+      41/      34 : C5                  	PUSH B
+      42/      35 :                     	
+      43/      35 : E3                  	XTHL	;HL(L,H)<=>(SP,SP+1)
+      44/      36 :                     
+      45/      36 : 21 CD AB            	LXI H, 0ABCDH
+      46/      39 : 11 34 12            	LXI D, 1234H
+      47/      3C : EB                  	XCHG	; HL<=>DE
+      48/      3D :                     
+      49/      3D : F9                  	SPHL	;SP=HL
+      50/      3E :                     
+      51/      3E : 21 89 07            	LXI H, 0789H
+      52/      41 : E9                  	PCHL	;PC=HL
+      53/      42 :                     	
+      54/     789 :                     	org 789H
+      55/     789 : 21 00 00            	LXI H, 0000H
+      56/     78C : E9                  	PCHL
+      57/     78D :                     ERR:
+      58/     78D : 76                  	HLT
+      59/     78E :                     
+      60/     78E :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test9.asm - Page 2 - 2023/03/20 19:22:20
+
+
+ AS V1.42 Beta [Bld 236] - Source File test9.asm - Page 3 - 2023/03/20 19:22:20
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/20" - |
+*ERR :                          78D C | *FALSE :                          0 - |
+*FULLPMMU :                       1 - | *HAS64 :                          1 - |
+*HASFPU :                         0 - | *HASPMMU :                        0 - |
+*INSUPMODE :                      0 - | *LISTON :                         1 - |
+*MACEXP :                         7 - | *MOMCPU :                      8080 - |
+*MOMCPUNAME :                "8080" - | *NESTMAX :                      100 - |
+*PADDING :                        1 - | *RELAXED :                        0 - |
+*START :                          0 C | *TIME :                  "19:22:20" - |
+*TRUE :                           1 - | *VERSION :                     142F - |
+*Z80SYNTAX :                      0 - |
+
+     24 symbols
+     24 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test9.asm - Page 4 - 2023/03/20 19:22:20
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     61 lines source file
+      1 pass
+      0 errors
+      0 warnings

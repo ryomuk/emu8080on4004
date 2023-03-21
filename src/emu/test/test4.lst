@@ -1,0 +1,134 @@
+ AS V1.42 Beta [Bld 236] - Source File test4.asm - Page 1 - 2023/03/19 18:34:04
+
+
+       1/       0 :                     ;;; test4.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; ADD, ADC, SUB, SBB
+       4/       0 :                     
+       5/       0 :                     	CPU	8080
+       6/       0 :                     START:
+       7/       0 :                     ;;; ----------------------------------
+       8/       0 : 3E 11               	MVI A, 11H
+       9/       2 : 06 22               	MVI B, 22H
+      10/       4 : 80                  	ADD B			;A=33H
+      11/       5 :                     
+      12/       5 : 3E F0               	MVI A, 0F0H
+      13/       7 : 0E 11               	MVI C, 11H
+      14/       9 : 81                  	ADD C			;A=01H,CY=1
+      15/       A :                     
+      16/       A : 3E F0               	MVI A, 0F0H
+      17/       C : 16 0F               	MVI D, 00FH
+      18/       E : 82                  	ADD D			;A=FF,CY=0
+      19/       F :                     
+      20/       F : AF                  	XRA A			;A=00,CY=0
+      21/      10 : 3E F0               	MVI A, 0F0H		;
+      22/      12 : 1E 0F               	MVI E, 0FH
+      23/      14 : 83                  	ADD E			;A=FF
+      24/      15 :                     ;;; ----------------------------------
+      25/      15 : 3E 11               	MVI A, 11H
+      26/      17 : 06 22               	MVI B, 22H
+      27/      19 : 88                  	ADC B			;A=33H
+      28/      1A :                     
+      29/      1A : 3E F0               	MVI A, 0F0H
+      30/      1C : 0E 11               	MVI C, 11H
+      31/      1E : 89                  	ADC C			;A=01H
+      32/      1F :                     
+      33/      1F : 37                  	STC			;CY=1
+      34/      20 : 3E F0               	MVI A, 0F0H
+      35/      22 : 16 0F               	MVI D, 0FH
+      36/      24 : 8A                  	ADC D			;A=00
+      37/      25 :                     
+      38/      25 : AF                  	XRA A			;CY=0
+      39/      26 : 3E F0               	MVI A, 0F0H
+      40/      28 : 1E 0F               	MVI E, 0FH
+      41/      2A : 8B                  	ADC E			;A=FF
+      42/      2B :                     ;;; ----------------------------------
+      43/      2B : 3E 33               	MVI A, 33H
+      44/      2D : 06 11               	MVI B, 11H
+      45/      2F : 90                  	SUB B			;A=22H
+      46/      30 :                     
+      47/      30 : 3E 10               	MVI A, 10H
+      48/      32 : 0E 11               	MVI C, 11H
+      49/      34 : 91                  	SUB C			;A=FFH,CY=1
+      50/      35 :                     
+      51/      35 : 37                  	STC
+      52/      36 : 3E 10               	MVI A, 10H
+      53/      38 : 16 10               	MVI D, 10H
+      54/      3A : 92                  	SUB D			;A=00,CY=0
+      55/      3B :                     
+      56/      3B : AF                  	XRA A
+      57/      3C : 3E 10               	MVI A, 10H
+      58/      3E : 1E 10               	MVI E, 10H
+      59/      40 : 93                  	SUB E			;A=00,CY=0
+      60/      41 :                     ;;; ----------------------------------
+ AS V1.42 Beta [Bld 236] - Source File test4.asm - Page 2 - 2023/03/19 18:34:04
+
+
+      61/      41 : 3E 33               	MVI A, 33H
+      62/      43 : 06 11               	MVI B, 11H
+      63/      45 : 98                  	SBB B			;A=22
+      64/      46 :                     
+      65/      46 : 3E 10               	MVI A, 10H
+      66/      48 : 0E 11               	MVI C, 11H
+      67/      4A : 99                  	SBB C			;A=FF,CY=1
+      68/      4B :                     
+      69/      4B : 37                  	STC
+      70/      4C : 3E 10               	MVI A, 10H
+      71/      4E : 16 10               	MVI D, 10H
+      72/      50 : 9A                  	SBB D			;A=FF,CY=1
+      73/      51 :                     
+      74/      51 : AF                  	XRA A
+      75/      52 : 3E 10               	MVI A, 10H
+      76/      54 : 1E 10               	MVI E, 10H
+      77/      56 : 9B                  	SBB E			;A=0,CY=0
+      78/      57 :                     ;;; ----------------------------------
+      79/      57 : 21 BC 0A            	LXI H, 0ABCH
+      80/      5A : 36 11               	MVI M, 11H
+      81/      5C : 3E FF               	MVI A, 0FFH
+      82/      5E : 96                  	SUB M
+      83/      5F : 96                  	SUB M
+      84/      60 : 96                  	SUB M
+      85/      61 : 96                  	SUB M
+      86/      62 : 96                  	SUB M
+      87/      63 :                     	
+      88/      63 : 76                  	HLT
+      89/      64 :                     
+      90/      64 :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test4.asm - Page 3 - 2023/03/19 18:34:04
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/19" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - | *START :                          0 C |
+*TIME :                  "18:34:04" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     23 symbols
+     23 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test4.asm - Page 4 - 2023/03/19 18:34:04
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     92 lines source file
+      1 pass
+      0 errors
+      0 warnings

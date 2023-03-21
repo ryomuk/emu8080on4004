@@ -1,0 +1,135 @@
+ AS V1.42 Beta [Bld 236] - Source File test5.asm - Page 1 - 2023/03/19 18:34:44
+
+
+       1/       0 :                     ;;; test5.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; ANI, XRI, ORI, CPI
+       4/       0 :                     
+       5/       0 :                     	CPU	8080
+       6/       0 :                     START:
+       7/       0 :                     ;;; ----------------------------------
+       8/       0 : 3E 00               	MVI A, 00H
+       9/       2 : E6 00               	ANI 00H
+      10/       4 : 3E 00               	MVI A, 00H
+      11/       6 : E6 FF               	ANI 0FFH
+      12/       8 :                     
+      13/       8 : 3E FF               	MVI A, 0FFH
+      14/       A : E6 00               	ANI 00H
+      15/       C : 3E FF               	MVI A, 0FFH
+      16/       E : E6 FF               	ANI 0FFH
+      17/      10 :                     
+      18/      10 : 3E 55               	MVI A, 55H
+      19/      12 : E6 AA               	ANI 0AAH
+      20/      14 : 3E AA               	MVI A, 0AAH
+      21/      16 : E6 55               	ANI 55H
+      22/      18 :                     
+      23/      18 : 3E FF               	MVI A, 0FFH
+      24/      1A : E6 55               	ANI 55H
+      25/      1C : 3E FF               	MVI A, 0FFH
+      26/      1E : E6 AA               	ANI 0AAH
+      27/      20 :                     ;;; ----------------------------------
+      28/      20 : 3E 00               	MVI A, 00H
+      29/      22 : F6 00               	ORI 00H
+      30/      24 : 3E 00               	MVI A, 00H
+      31/      26 : F6 FF               	ORI 0FFH
+      32/      28 :                     
+      33/      28 : 3E FF               	MVI A, 0FFH
+      34/      2A : F6 00               	ORI 00H
+      35/      2C : 3E FF               	MVI A, 0FFH
+      36/      2E : F6 FF               	ORI 0FFH
+      37/      30 :                     
+      38/      30 : 3E 55               	MVI A, 55H
+      39/      32 : F6 AA               	ORI 0AAH
+      40/      34 : 3E AA               	MVI A, 0AAH
+      41/      36 : F6 55               	ORI 55H
+      42/      38 :                     
+      43/      38 : 3E FF               	MVI A, 0FFH
+      44/      3A : F6 55               	ORI 55H
+      45/      3C : 3E FF               	MVI A, 0FFH
+      46/      3E : F6 AA               	ORI 0AAH
+      47/      40 :                     ;;; ----------------------------------
+      48/      40 : 3E 00               	MVI A, 00H
+      49/      42 : EE 00               	XRI 00H
+      50/      44 : 3E 00               	MVI A, 00H
+      51/      46 : EE FF               	XRI 0FFH
+      52/      48 :                     
+      53/      48 : 3E FF               	MVI A, 0FFH
+      54/      4A : EE 00               	XRI 00H
+      55/      4C : 3E FF               	MVI A, 0FFH
+      56/      4E : EE FF               	XRI 0FFH
+      57/      50 :                     
+      58/      50 : 3E 55               	MVI A, 55H
+      59/      52 : EE AA               	XRI 0AAH
+      60/      54 : 3E AA               	MVI A, 0AAH
+ AS V1.42 Beta [Bld 236] - Source File test5.asm - Page 2 - 2023/03/19 18:34:44
+
+
+      61/      56 : EE 55               	XRI 55H
+      62/      58 :                     
+      63/      58 : 3E FF               	MVI A, 0FFH
+      64/      5A : EE 55               	XRI 55H
+      65/      5C : 3E FF               	MVI A, 0FFH
+      66/      5E : EE AA               	XRI 0AAH
+      67/      60 :                     ;;; ----------------------------------
+      68/      60 : 3E 00               	MVI A, 00H
+      69/      62 : FE 00               	CPI 00H
+      70/      64 : 3E 00               	MVI A, 00H
+      71/      66 : FE FF               	CPI 0FFH
+      72/      68 :                     
+      73/      68 : 3E FF               	MVI A, 0FFH
+      74/      6A : FE 00               	CPI 00H
+      75/      6C : 3E FF               	MVI A, 0FFH
+      76/      6E : FE FF               	CPI 0FFH
+      77/      70 :                     
+      78/      70 : 3E 55               	MVI A, 55H
+      79/      72 : FE AA               	CPI 0AAH
+      80/      74 : 3E AA               	MVI A, 0AAH
+      81/      76 : FE 55               	CPI 55H
+      82/      78 :                     
+      83/      78 : 3E FF               	MVI A, 0FFH
+      84/      7A : FE 55               	CPI 55H
+      85/      7C : 3E FF               	MVI A, 0FFH
+      86/      7E : FE AA               	CPI 0AAH
+      87/      80 :                     ;;; ----------------------------------
+      88/      80 :                     	
+      89/      80 : 76                  	HLT
+      90/      81 :                     
+      91/      81 :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test5.asm - Page 3 - 2023/03/19 18:34:44
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/19" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - | *START :                          0 C |
+*TIME :                  "18:34:44" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     23 symbols
+     23 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test5.asm - Page 4 - 2023/03/19 18:34:44
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     93 lines source file
+      1 pass
+      0 errors
+      0 warnings

@@ -1,0 +1,52 @@
+ AS V1.42 Beta [Bld 236] - Source File test10.asm - Page 1 - 2023/03/21 10:26:51
+
+
+       1/       0 :                     ;;; test10.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; echo back
+       4/       0 :                     	CPU	8080
+       5/       0 :                     	org 0000H
+       6/       0 :                     START:
+       7/       0 : DB 01               	IN 01H
+       8/       2 : D3 01               	OUT 01H
+       9/       4 : C3 00 00            	JMP START
+      10/       7 :                     
+      11/       7 :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test10.asm - Page 2 - 2023/03/21 10:26:51
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/21" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - |  START :                          0 C |
+*TIME :                  "10:26:51" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     23 symbols
+     22 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test10.asm - Page 3 - 2023/03/21 10:26:51
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     12 lines source file
+      1 pass
+      0 errors
+      0 warnings

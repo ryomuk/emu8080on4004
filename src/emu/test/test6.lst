@@ -1,0 +1,136 @@
+ AS V1.42 Beta [Bld 236] - Source File test6.asm - Page 1 - 2023/03/20  8:42:20
+
+
+       1/       0 :                     ;;; test6.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; 0CH to 3FH
+       4/       0 :                     
+       5/       0 :                     	CPU	8080
+       6/       0 :                     START:
+       7/       0 : 0E 00               	MVI C, 00H
+       8/       2 : 0C                  	INR C
+       9/       3 : 0D                  	DCR C
+      10/       4 : 0D                  	DCR C
+      11/       5 : 0E 80               	MVI C, 80H
+      12/       7 : 0C                  	INR C
+      13/       8 : 0D                  	DCR C
+      14/       9 : 0D                  	DCR C
+      15/       A :                     
+      16/       A : 11 23 01            	LXI D, 0123H
+      17/       D : 3E 12               	MVI A, 12H
+      18/       F : 12                  	STAX D
+      19/      10 : 13                  	INX D
+      20/      11 : 14                  	INR D
+      21/      12 : 15                  	DCR D
+      22/      13 :                     
+      23/      13 : 21 11 11            	LXI H, 1111H
+      24/      16 : 19                  	DAD D
+      25/      17 :                     
+      26/      17 : 3E 00               	MVI A, 00H
+      27/      19 : 1A                  	LDAX D
+      28/      1A :                     	
+      29/      1A : 1B                  	DCX D
+      30/      1B : 1C                  	INR E
+      31/      1C : 1D                  	DCR E
+      32/      1D :                     
+      33/      1D : 21 34 12            	LXI H, 1234H
+      34/      20 : 22 00 01            	SHLD 0100H
+      35/      23 :                     
+      36/      23 : 76                  	HLT
+      37/      24 :                     	
+      38/      24 : 31 00 01            	LXI SP, 0100H
+      39/      27 : 23                  	INX H
+      40/      28 : 36 1E               	MVI M, 30
+      41/      2A : 7E                  	MOV A, M
+      42/      2B : 24                  	INR H
+      43/      2C : 36 0C               	MVI M, 12
+      44/      2E : 7E                  	MOV A, M
+      45/      2F :                     
+      46/      2F : 25                  	DCR H
+      47/      30 :                     
+      48/      30 : 29                  	DAD H
+      49/      31 :                     
+      50/      31 : 2A 00 01            	LHLD 0100H
+      51/      34 : 21 00 01            	LXI H, 0100H
+      52/      37 : 2B                  	DCX H
+      53/      38 : 2C                  	INR L
+      54/      39 : 2D                  	DCR L
+      55/      3A :                     
+      56/      3A : 3E 55               	MVI A, 55H
+      57/      3C : 2F                  	CMA
+      58/      3D :                     
+      59/      3D : 31 00 03            	LXI SP, 300H
+      60/      40 : 3E 22               	MVI A, 34
+ AS V1.42 Beta [Bld 236] - Source File test6.asm - Page 2 - 2023/03/20  8:42:20
+
+
+      61/      42 : 32 00 01            	STA 0100H
+      62/      45 : 33                  	INX SP
+      63/      46 :                     
+      64/      46 : 21 00 02            	LXI H, 200H
+      65/      49 : 36 23               	MVI M, 23H
+      66/      4B : 77                  	MOV M, A
+      67/      4C : 34                  	INR M
+      68/      4D : 77                  	MOV M, A
+      69/      4E : 7E                  	MOV A, M
+      70/      4F :                     
+      71/      4F : 21 11 01            	LXI H, 111H
+      72/      52 : 31 22 02            	LXI SP, 222H
+      73/      55 : 39                  	DAD SP
+      74/      56 : 3B                  	DCX SP
+      75/      57 :                     	
+      76/      57 : 3E AB               	MVI A, 0ABH
+      77/      59 :                     
+      78/      59 : 3A 00 02            	LDA 200H
+      79/      5C :                     
+      80/      5C : 76                  	HLT
+      81/      5D :                     
+      82/      5D : 21 00 03            	LXI H, 300H
+      83/      60 : 46                  	MOV B, M
+      84/      61 : 3B                  	DCX SP
+      85/      62 :                     	
+      86/      62 : 3C                  	INR A
+      87/      63 : 3D                  	DCR A
+      88/      64 :                     
+      89/      64 :                     
+      90/      64 : 76                  	HLT
+      91/      65 :                     
+      92/      65 :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test6.asm - Page 3 - 2023/03/20  8:42:20
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/20" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - | *START :                          0 C |
+*TIME :                  " 8:42:20" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     23 symbols
+     23 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test6.asm - Page 4 - 2023/03/20  8:42:20
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     93 lines source file
+      1 pass
+      0 errors
+      0 warnings

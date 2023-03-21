@@ -1,0 +1,135 @@
+ AS V1.42 Beta [Bld 236] - Source File test1.asm - Page 1 - 2023/03/19  9:57:15
+
+
+       1/       0 :                     ;;; test1.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; 00H to 0BH, RLC, RRC, RAL, RAR
+       4/       0 :                     
+       5/       0 :                     	CPU	8080
+       6/       0 :                     START:
+       7/       0 : 00                  	NOP
+       8/       1 : 3E DA               	MVI A, 0DAH	;A=DAH
+       9/       3 : 01 BC 0A            	LXI B, 0ABCH	;B=0ABCH
+      10/       6 : 02                  	STAX B		;PM(0ABC)=DA
+      11/       7 : 76                  	HLT
+      12/       8 :                     
+      13/       8 : 03                  	INX B		;B=0ABDH, SZC=000
+      14/       9 : 01 00 00            	LXI B, 0000H	;B=0000H
+      15/       C : 03                  	INX B		;B=0001H
+      16/       D : 0B                  	DCX B		;B=0000H, SZC=000
+      17/       E : 0B                  	DCX B		;B=FFFFH, SZC=000
+      18/       F : 0B                  	DCX B		;B=FFFEH
+      19/      10 : 03                  	INX B		;B=FFFFH
+      20/      11 : 03                  	INX B		;B=0000H
+      21/      12 : 03                  	INX B		;B=0001H
+      22/      13 :                     
+      23/      13 : 06 00               	MVI B, 00H	;B=00H
+      24/      15 :                     
+      25/      15 : 04                  	INR B		;B=01H, SZC=000
+      26/      16 : 05                  	DCR B		;B=00H, SZC=010
+      27/      17 : 05                  	DCR B		;B=FFH, SZC=100
+      28/      18 : 04                  	INR B		;B=00H, SZC=010
+      29/      19 : 04                  	INR B		;B=01H, SZC=000
+      30/      1A :                     
+      31/      1A : 37                  	STC		;       SZC=001
+      32/      1B : 3F                  	CMC		;       SZC=000
+      33/      1C : 3F                  	CMC		;       SZC=001
+      34/      1D : 3F                  	CMC		;       SZC=000
+      35/      1E : 3E 01               	MVI A, 01H	;A=01H, SZC=000
+      36/      20 : 07                  	RLC		;A=02H, SZC=000
+      37/      21 : 07                  	RLC		;A=04H, SZC=000
+      38/      22 : 07                  	RLC		;A=08H, SZC=000
+      39/      23 : 07                  	RLC		;A=10H, SZC=000
+      40/      24 : 07                  	RLC		;A=20H, SZC=000
+      41/      25 : 07                  	RLC		;A=40H, SZC=000
+      42/      26 : 07                  	RLC		;A=80H, SZC=000
+      43/      27 : 07                  	RLC		;A=01H, SZC=001
+      44/      28 : 07                  	RLC		;A=02H, SZC=000
+      45/      29 :                     
+      46/      29 : 3E 80               	MVI A, 80H	;A=80H, SZC=000
+      47/      2B : 0F                  	RRC		;A=40H, SZC=000
+      48/      2C : 0F                  	RRC		;A=20H, SZC=000
+      49/      2D : 0F                  	RRC		;A=10H, SZC=000
+      50/      2E : 0F                  	RRC		;A=08H, SZC=000
+      51/      2F : 0F                  	RRC		;A=04H, SZC=000
+      52/      30 : 0F                  	RRC		;A=02H, SZC=000
+      53/      31 : 0F                  	RRC		;A=01H, SZC=000
+      54/      32 : 0F                  	RRC		;A=80H, SZC=001
+      55/      33 : 0F                  	RRC		;A=40H, SZC=000
+      56/      34 :                     	
+      57/      34 : 3E 01               	MVI A, 01H	;A=01H, SZC=000
+      58/      36 : 17                  	RAL		;A=02H, SZC=000
+      59/      37 : 17                  	RAL		;A=04H, SZC=000
+      60/      38 : 17                  	RAL		;A=08H, SZC=000
+ AS V1.42 Beta [Bld 236] - Source File test1.asm - Page 2 - 2023/03/19  9:57:15
+
+
+      61/      39 : 17                  	RAL		;A=10H, SZC=000
+      62/      3A : 17                  	RAL		;A=20H, SZC=000
+      63/      3B : 17                  	RAL		;A=40H, SZC=000
+      64/      3C : 17                  	RAL		;A=80H, SZC=000
+      65/      3D : 17                  	RAL		;A=00H, SZC=001
+      66/      3E : 17                  	RAL		;A=01H, SZC=000
+      67/      3F :                     	
+      68/      3F : 3E 80               	MVI A, 80H	;A=80H, SZC=000
+      69/      41 : 1F                  	RAR		;A=40H, SZC=000
+      70/      42 : 1F                  	RAR		;A=20H, SZC=000
+      71/      43 : 1F                  	RAR		;A=10H, SZC=000
+      72/      44 : 1F                  	RAR		;A=08H, SZC=000
+      73/      45 : 1F                  	RAR		;A=04H, SZC=000
+      74/      46 : 1F                  	RAR		;A=02H, SZC=000
+      75/      47 : 1F                  	RAR		;A=01H, SZC=000
+      76/      48 : 1F                  	RAR		;A=00H, SZC=001
+      77/      49 : 1F                  	RAR		;A=80H, SZC=000
+      78/      4A :                     
+      79/      4A : 21 11 11            	LXI H, 1111H	;HL=1111H
+      80/      4D : 01 22 22            	LXI B, 2222H	;BC=2222H
+      81/      50 : 09                  	DAD B		;HL=3333H, BC=2222H, SZC=000
+      82/      51 : 21 FF 8F            	LXI H, 8FFFH	;HL=8FFFH
+      83/      54 : 01 10 70            	LXI B, 7010H	;BC=8FFFH, BC=7010H
+      84/      57 : 09                  	DAD B		;HL=000FH, SZC=001
+      85/      58 :                     
+      86/      58 : 01 BC 0A            	LXI B, 0ABCH	;B=0ABCH
+      87/      5B : 0A                  	LDAX B		;A=DAH
+      88/      5C :                     	
+      89/      5C : C3 00 00            	JMP START
+      90/      5F :                     
+      91/      5F :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test1.asm - Page 3 - 2023/03/19  9:57:15
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/19" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - |  START :                          0 C |
+*TIME :                  " 9:57:15" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     23 symbols
+     22 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test1.asm - Page 4 - 2023/03/19  9:57:15
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     92 lines source file
+      1 pass
+      0 errors
+      0 warnings
