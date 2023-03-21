@@ -23,7 +23,6 @@
 ;;;---------------------------------------------------------------------------
 ;;; Emulator compile configuration
 ;;;---------------------------------------------------------------------------
-EMU_STEPMODE = 0
 ;; don't use DAA and FLAG_P because it takes much cost to implement them
 EMU_USE_DAA = 0		; don't use DAA
 ;;; EMU_USE_DAA = 1	; use DAA
@@ -150,12 +149,15 @@ REG8_ADDRH	equ REG16_ADDR+2
 REG4_FLAG_1P1C	equ REG8_FLAG
 REG4_FLAG_SZBH	equ REG8_FLAG+1
 
-REG16_MON_INDEX	equ 20H	;
-REG16_MON_ADDR	equ 24H	;
-REG16_MON_TMP	equ 28H	;
-REG8_MON_MEMSPACE	equ 2CH	; 'D', 'P', 'L' = (Data, Physical, Logical)
-REG8_MON_RESERVED	equ 2EH	; (reserved)
-REG16_MON_PMBANK	equ 30H	;
+REG4_EMU_STEP	equ 20H	; Execution mode (0:continuous, 1:step)
+	
+REG16_MON_INDEX	equ 28H	;
+REG16_MON_ADDR	equ 2CH	;
+REG16_MON_TMP	equ 30H	;
+REG16_MON_PMBANK	equ 34H	;
+REG8_MON_MEMSPACE	equ 38H	; 'D', 'P', 'L' = (Data, Physical, Logical)
+REG8_MON_RESERVED	equ 3AH	; (reserved)
+	
 
 ;;; RAM1
 REG16_STACK_40H	equ 40H		;; stack area
@@ -263,20 +265,105 @@ L5:
 	JCN ZN, L6
 	JUN COMMAND_G
 L6:
-	FIM P7, 'E'		; 8080 Emulator
-	JMS CMP_P1P7
-	JCN ZN, L10
+	FIM P7, 'E'		; jump to 8080 Emulator
+	JMS CMP_P1P7 		;
+	JCN ZN, L10		;
 
+	JMS LD_P1_PM16REG16P0_INCREMENT ; check next letter
+	JMS TOUPPER_P1
+	FIM P7, 'S'		; 'E' continuous mode, 'ES' step mode
+	JMS CMP_P1P7 		; 
+	JCN ZN, L6_CONTINUOUS	;
+	LDM 1H			; step mode
+	JUN L6_SETMODE
+L6_CONTINUOUS			; continuous mode
+	JMS DEC_REG16P0
+	LDM 0H
+L6_SETMODE:
+	FIM P7, REG4_EMU_STEP
+	LD_REG4P7_ACC
 	FIM P1, REG16_PC	; set start PC if designated
 	JMS GETHEX_REG16P1_PM16REG16P0_INCREMENT
-
 	JUN COMMAND_E
+
+
 L10:
 	FIM P0, lo(STR_CMDERR)
 	JMS PRINTSTR_P0
 
 	JUN CMD_LOOP
 
+
+;;;---------------------------------------------------------------------------
+;;; COMMAND_DP
+;;; Dump Physical Memory
+;;;	BANK=ADDR.FEDCBA98
+;;;  PM_ADDR=ADDR.76543210 + 0F00H
+;;;---------------------------------------------------------------------------
+COMMAND_DP:
+	FIM P1, REG16_MON_ADDR
+	JMS LD_P2P3_REG16P1
+
+	LD_P1_P2
+	JMS PM_SELECTPMB_P1
+	
+	LDM loop(8)
+	XCH CNT_I
+CMDDP_L0:
+	LD_P1_P2
+	JMS PRINTHEX_P1
+	FIM P1, ':'
+	JMS PUTCHAR_P1
+	FIM P1, 'F'
+	JMS PUTCHAR_P1
+	LD_P1_P3
+	JMS PRINTHEX_P1
+	FIM P1, ':'
+	JMS PUTCHAR_P1
+
+CMDDP_L1:	
+	LD_P0_P3
+	JMS PM_READ_P0_P1	; Read program memory
+	JMS PRINTHEX_P1
+
+	ISZ P3_LO, CMDDP_L1
+	JMS PRINT_CRLF
+	INC P3_HI
+	LD P3_HI
+	JCN Z, CMDDP_EXIT
+	ISZ CNT_I, CMDDP_L0
+CMDDP_EXIT:	
+	FIM P0, REG16_MON_ADDR
+	JMS LD_REG16P0_P2P3
+
+	JUN CMD_LOOP		; return to command loop
+
+;;;---------------------------------------------------------------------------
+;;; COMMAND_DL
+;;; Dump Logical Memory
+;;;---------------------------------------------------------------------------
+COMMAND_DL:
+	FIM P0, REG16_MON_ADDR
+	JMS LD_P1_REG8P0
+	LD_CNT_P1
+	LDM loop(8)
+	XCH CNT_I
+CMDDL_L0:
+	FIM P1, REG16_MON_ADDR
+	JMS PRINTHEX_REG16P1
+	FIM P1, ':'
+	JMS PUTCHAR_P1
+CMDDL_L1:	
+	JMS LD_P1_PM16REG16P0_INCREMENT
+	JMS PRINTHEX_P1
+
+	ISZ CNT_J, CMDDL_L1
+	JMS PRINT_CRLF
+	ISZ CNT_I, CMDDL_L0
+CMDDL_NEXT:
+	JUN CMD_LOOP		; return to command loop
+
+	
 ;;;---------------------------------------------------------------------------
 ;;; COMMAND_D
 ;;; Dump Memory
@@ -339,50 +426,6 @@ CMDDD_L1:
 	JUN CMD_LOOP		; return to command loop
 	
 ;;;---------------------------------------------------------------------------
-;;; COMMAND_DP
-;;; Dump Physical Memory
-;;;	BANK=ADDR.FEDCBA98
-;;;  PM_ADDR=ADDR.76543210 + 0F00H
-;;;---------------------------------------------------------------------------
-COMMAND_DP:
-	FIM P1, REG16_MON_ADDR
-	JMS LD_P2P3_REG16P1
-
-	LD_P1_P2
-	JMS PM_SELECTPMB_P1
-	
-	LDM loop(8)
-	XCH CNT_I
-CMDDP_L0:
-	LD_P1_P2
-	JMS PRINTHEX_P1
-	FIM P1, ':'
-	JMS PUTCHAR_P1
-	FIM P1, 'F'
-	JMS PUTCHAR_P1
-	LD_P1_P3
-	JMS PRINTHEX_P1
-	FIM P1, ':'
-	JMS PUTCHAR_P1
-
-CMDDP_L1:	
-	LD_P0_P3
-	JMS PM_READ_P0_P1	; Read program memory
-	JMS PRINTHEX_P1
-
-	ISZ P3_LO, CMDDP_L1
-	JMS PRINT_CRLF
-	INC P3_HI
-	LD P3_HI
-	JCN Z, CMDDP_EXIT
-	ISZ CNT_I, CMDDP_L0
-CMDDP_EXIT:	
-	FIM P0, REG16_MON_ADDR
-	JMS LD_REG16P0_P2P3
-
-	JUN CMD_LOOP		; return to command loop
-
-;;;---------------------------------------------------------------------------
 ;;; COMMAND_G
 ;;; Go to Top of Program memory PM_RAM_START(0x0F00)
 ;;;---------------------------------------------------------------------------
@@ -416,32 +459,6 @@ CMDH_EXIT:
 	JMS PRINT_CRLF
 	JUN CMD_LOOP
 
-;;;---------------------------------------------------------------------------
-;;; COMMAND_DL
-;;; Dump Logical Memory
-;;;---------------------------------------------------------------------------
-COMMAND_DL:
-	FIM P0, REG16_MON_ADDR
-	JMS LD_P1_REG8P0
-	LD_CNT_P1
-	LDM loop(8)
-	XCH CNT_I
-CMDDL_L0:
-	FIM P1, REG16_MON_ADDR
-	JMS PRINTHEX_REG16P1
-	FIM P1, ':'
-	JMS PUTCHAR_P1
-CMDDL_L1:	
-	JMS LD_P1_PM16REG16P0_INCREMENT
-	JMS PRINTHEX_P1
-
-	ISZ CNT_J, CMDDL_L1
-	JMS PRINT_CRLF
-	ISZ CNT_I, CMDDL_L0
-CMDDL_NEXT:
-	JUN CMD_LOOP		; return to command loop
-
-	
 ;;;---------------------------------------------------------------------------
 ;;; COMMAND_L
 ;;; Load to Logical Memory
@@ -556,20 +573,23 @@ EMU_START:
 	JMS PRINTSTR_P0
 
 EMU_LOOP:
-	if EMU_STEPMODE
-	JMS EMU_PRINTREGISTERS
+	FIM P7, REG4_EMU_STEP
+	LD_ACC_REG4P7
+	JCN Z, EMU_EXEC
+	JMS EMU_PRINT_REGISTERS
 	JMS GETCHAR_P1
 	FIM P7, '.'
 	JMS CMP_P1P7
 	JCN Z, EMU_EXIT
-	endif			; EMU_STEPMODE
+EMU_EXEC:
 	
 	JMS EXEC_CODE	; call by subroutine consumes precious PC stack 
 			; but it can return here by BBL from various routines
 			; in contrast JUN consumes 2 bytes
 	JUN EMU_LOOP
+
 EMU_EXIT:
-	JUN CMD_LOOP
+	JUN CMD_LOOP	; go back to monitor loop
 
 ;;;---------------------------------------------------------------------------
 ;;; EXEC_CODE
@@ -589,6 +609,8 @@ CODE_007F:			; 00H<=CODE<=7FH
 	JCN CN, CODE_003F	; 00H<=CODE<=3FH
 	JUN CODE_407F		; 40H<=CODE<=7FH
 ;;;---------------------------------------------------------------------------
+	NOP
+	NOP
 CODE_003F:			; 00H<=CODE<=3FH
 	LD P1_LO
 	JCN NZ,CODE_NOT_NOP
@@ -614,10 +636,6 @@ CODE_80FF:			; 80H<=P1<=FFH
 	JCN CN, CODE_80BF
 	JUN CODE_C0FF		; C0H<=P1<=FFH
 
-	NOP
-	NOP
-	NOP
-	NOP
 ;;;---------------------------------------------------------------------------
 CODE_407F:			; 40H<=P1<=7FH
 CODE_80BF:			; 80H<=P1<=BFH
@@ -734,11 +752,13 @@ CODE_80BF_ARITH_LOGIC:
 ;;; Emulate individual codes
 ;;;---------------------------------------------------------------------------
 CODE_76H:			; HLT
-	if (EMU_STEPMODE != 0)
-	FIM P0, lo(STR
+	FIM P0, lo(STR_EMU_HLT)
 	JMS PRINTSTR_P0
-	JMS EMU_PRINTREGISTERS
-	endif
+	FIM P7, REG4_EMU_STEP
+	LD_ACC_REG4P7
+	JCN ZN, CODE_76H_EXIT
+	JMS EMU_PRINT_REGISTERS	; print registers if continuous mode
+CODE_76H_EXIT:
 	JUN CMD_LOOP		; go back to monitor by HLT
 
 CODE_00H:			; NOP
@@ -2033,6 +2053,28 @@ XOR_P1_P2:
 	BBL 0
 
 ;;;---------------------------------------------------------------------------
+;;; OR_P1_P2
+;;; P1 = P1 | P2
+;;;---------------------------------------------------------------------------
+OR_P1_P2:
+	LD P1_LO
+	XCH R6
+	LD P2_LO
+	XCH R7
+	JMS OR_R6_R7
+	LD R6
+	XCH P1_LO
+	
+	LD P1_HI
+	XCH R6
+	LD P2_HI
+	XCH R7
+	JMS OR_R6_R7
+	LD R6
+	XCH P1_HI
+	BBL 0
+
+;;;---------------------------------------------------------------------------
 ;;; OR_R6_R7
 ;;; R6 = R6 | R7
 ;;;---------------------------------------------------------------------------
@@ -2082,27 +2124,6 @@ OR67_L3:
 OR67_L4:
 	BBL 0
 
-;;;---------------------------------------------------------------------------
-;;; OR_P1_P2
-;;; P1 = P1 | P2
-;;;---------------------------------------------------------------------------
-OR_P1_P2:
-	LD P1_LO
-	XCH R6
-	LD P2_LO
-	XCH R7
-	JMS OR_R6_R7
-	LD R6
-	XCH P1_LO
-	
-	LD P1_HI
-	XCH R6
-	LD P2_HI
-	XCH R7
-	JMS OR_R6_R7
-	LD R6
-	XCH P1_HI
-	BBL 0
 
 ;;;	org 0900H
 ;;;----------------------------------------------------------------------------
@@ -2283,8 +2304,6 @@ LD_REG8P6_REG8P7:
 	WRM
 
 	BBL 0
-
-
 
 ;;;----------------------------------------------------------------------------
 ;;; LD_REG8P0_P1
@@ -2670,13 +2689,13 @@ EMU_IN_UARTRC:
 
 EMU_IN_EXIT:
 	JMS PRINT_CRLF
-	JMS EMU_PRINTREGISTERS
+	JMS EMU_PRINT_REGISTERS
 	JUN CMD_LOOP
 	
 ;;;----------------------------------------------------------------------------
-;;; EMU_PRINTREGISTERS
+;;; EMU_PRINT_REGISTERS
 ;;;----------------------------------------------------------------------------
-EMU_PRINTREGISTERS:
+EMU_PRINT_REGISTERS:
 	FIM P0, lo(STR_EMU_REG)
 	JMS PRINTSTR_P0
 
