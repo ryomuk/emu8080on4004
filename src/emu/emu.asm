@@ -44,7 +44,8 @@ SETFLAG_SUB_1 macro
 ;;;---------------------------------------------------------------------------
 EMU_UARTRC	equ	00H	; for tinybasic-1.0
 EMU_UARTRD	equ	01H	; for tynybasic-1.0
-EMU_IN_UARTRC_VALUE	equ 22H	; for tynybasic-1.0
+;;;	EMU_IN_UARTRC_VALUE	equ 22H	; for tynybasic-1.0
+EMU_IN_UARTRC_VALUE	equ 0FFH	;
 
 ;;;---------------------------------------------------------------------------
 ;;; Hardware Configuration
@@ -1826,8 +1827,8 @@ SETFLAG_ZSP_P1:
 ;;;              0123456789ABCDEF
 ;;; 4bit table =(0110100110010110)
 ;;; org 09D0H
-;;; PARITY4TABLE:
-;;; data 0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0
+;;; PARITY4TABLE: (1 when EVEN)
+;;; data 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1
 ;;; GETPARITY_R1:
 ;;; FIN P2
 ;;; LD P2_LO
@@ -1845,7 +1846,7 @@ SETFLAG_ZSP_P1:
 ;;; JMS GETPARITY_R1
 ;;; LD R1
 ;;; ADD P1_H
-;;; RAR       ; here CY=PARITY
+;;; RAR       ; here CY=PARITY (1 when EVEN)
 	
 	CLB
 	XCH CNT_I		; I=0
@@ -1889,15 +1890,17 @@ PFLAG_CNT8:
 	RDM
 	RAL
 	RAL
-	WRM
+	WRM			; FLAG=xCxx (CY=P)
 
 	LD CNT_I
 	RAR
-	CMC
+	CMC			; CY=~(LSB of I) (P=1 when EVEN )
 
 	RDM
 	RAR
 	RAR
+	WRM			; FLAG=xPxC
+	
 	endif			; EMU_USE_FLAG_P
 	BBL 0	
 
