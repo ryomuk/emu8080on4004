@@ -3131,7 +3131,8 @@ GETLINE_PM16REG16P0:
 
 GETLINE_LOOP:
 	JMS GETCHAR_P1		; P1 = getchar()
-
+	JCN ZN, GETLINE_LOOP	; ACC!=0 (stop bit error)
+	
 	JMS ISCRLF_P1
 	JCN Z, GETLINE_L1
 	JMS PRINT_CR
@@ -3411,6 +3412,27 @@ ISALPHA_L20:
 ISALPHA_FALSE:
 	BBL 0
 
+;;;---------------------------------------------------------------------------
+;;; CTOI_P1
+;;; convert character ('0'...'f') to value 0000 ... 1111
+;;; no error check
+;;; input: P1(R2R3)
+;;; output: P1_LO, (P1_HI=0)
+;;;---------------------------------------------------------------------------
+CTOI_P1:
+	CLB
+	LDM 3
+	SUB P1_HI
+	JCN Z, CTOI_09	; check upper 4bit
+	CLB
+	LDM 9
+	ADD P1_LO
+	XCH P1_LO		; P1_HI = P1_LO+ 9 for 'a-fA-F'
+CTOI_09:
+	CLB
+	XCH R2			; R2 = 0
+	BBL 0
+	
 ;;;----------------------------------------------------------------------------
 ;;; ISHEX_P1
 ;;; check P1 is a hex digit letter ('0' to '9') or ('a' to 'f') or ('A' to 'F')
@@ -3451,27 +3473,6 @@ ISHEX_L20:
 ISHEX_FALSE:
 	BBL 0
 
-;;;---------------------------------------------------------------------------
-;;; CTOI_P1
-;;; convert character ('0'...'f') to value 0000 ... 1111
-;;; no error check
-;;; input: P1(R2R3)
-;;; output: P1_LO, (P1_HI=0)
-;;;---------------------------------------------------------------------------
-CTOI_P1:
-	CLB
-	LDM 3
-	SUB P1_HI
-	JCN Z, CTOI_09	; check upper 4bit
-	CLB
-	LDM 9
-	ADD P1_LO
-	XCH P1_LO		; P1_HI = P1_LO+ 9 for 'a-fA-F'
-CTOI_09:
-	CLB
-	XCH R2			; R2 = 0
-	BBL 0
-	
 ;;;---------------------------------------------------------------------------
 ;;; CMP_P1P7
 ;;; compare P1(R2R3) and P7(R14R15)
