@@ -23,22 +23,10 @@
 ;;;---------------------------------------------------------------------------
 ;;; Emulator compile configuration
 ;;;---------------------------------------------------------------------------
-;; don't use DAA and FLAG_P because it takes much cost to implement them
-EMU_USE_DAA = 0		; don't use DAA
-;;; EMU_USE_DAA = 1	; use DAA
+;; FLAG_P is not implemented because it takes much cost
 EMU_USE_FLAG_P = 0	; don't use P FLAG
 ;;; EMU_USE_FLAG_P = 1	; use P FLAG
 
-SETFLAG_SUB_0 macro
-	if EMU_USE_DAA
-	JMS DAA_SETFLAG_SUB_0
-	endif
-	endm
-SETFLAG_SUB_1 macro
-	if EMU_USE_DAA
-	JMS DAA_SETFLAG_SUB_1
-	endif
-	endm
 ;;;---------------------------------------------------------------------------
 ;;; Emulator port configuration
 ;;;---------------------------------------------------------------------------
@@ -815,7 +803,6 @@ CODE_08H:			; ...
 	BBL 0
 	
 CODE_09H:			; DAD B
-	SETFLAG_SUB_0
 	FIM P0, REG16_HL
 	FIM P1, REG16_BC
 	JMS ADD_REG16P0_REG16P1
@@ -920,7 +907,6 @@ CODE_18H:			; ...
 	BBL 0
 
 CODE_19H:			; DAD D
-	SETFLAG_SUB_0
 	FIM P0, REG16_HL
 	FIM P1, REG16_DE
 	JMS ADD_REG16P0_REG16P1
@@ -1026,7 +1012,7 @@ CODE_26H:			; MVI H,B2
 
 CODE_27H:			; DAA
 				; This is not properly implemeted
-				; due to the lack of CY4 flag
+				; due to the lack of AC(CY4) flag
 	FIM P0, REG8_A
 	JMS LD_P1_REG8P0
 	LD P1_LO
@@ -1045,7 +1031,6 @@ CODE_28H:			; ...
 	BBL 0
 
 CODE_29H:			; DAD H
-	SETFLAG_SUB_0
 	FIM P0, REG16_HL
 	FIM P1, REG16_HL
 	JMS ADD_REG16P0_REG16P1
@@ -1135,7 +1120,6 @@ CODE_33H:			; INX SP
 ;;;	BBL 0
 
 CODE_34H:			; INR M
-	SETFLAG_SUB_0
 	FIM P0, REG16_HL
 	JMS LD_P1_PM16REG16P0_INCREMENT
 	JMS DEC_REG16P0
@@ -1147,7 +1131,6 @@ CODE_34H:			; INR M
 ;;;	BBL 0
 
 CODE_35H:			; DCR M
-	SETFLAG_SUB_1
 	FIM P0, REG16_HL
 	JMS LD_P1_PM16REG16P0_INCREMENT
 	JMS DEC_REG16P0
@@ -1172,7 +1155,6 @@ CODE_38H:			; ...
 	BBL 0
 
 CODE_39H:			; DAD SP
-	SETFLAG_SUB_0
 	FIM P0, REG16_HL
 	FIM P1, REG16_SP
 	JMS ADD_REG16P0_REG16P1
@@ -1201,7 +1183,6 @@ CODE_3BH:			; DCX SP
 CODE_3CH:			; INR A
 	FIM P1, REG8_A
 CODE_INR:
-	SETFLAG_SUB_0
 	JMS INC_REG8P1
 	JUN SETFLAG_ZSP_REG8P1
 ;;;	BBL 0
@@ -1209,7 +1190,6 @@ CODE_INR:
 CODE_3DH:			; DCR A
 	FIM P1, REG8_A
 CODE_DCR:
-	SETFLAG_SUB_1
 	JMS DEC_REG8P1
 	JUN SETFLAG_ZSP_REG8P1
 ;;;	BBL 0
@@ -1278,7 +1258,6 @@ CODE_C5H:			; PUSH B
 CODE_C6H:			; ADI B2
 	JMS LD_P1_PM16REG16P0_INCREMENT ; P1=PM(REG(PC)++)
 ADI_P1:
-	SETFLAG_SUB_0
 	FIM P0, REG8_A
 	JMS ADD_REG8P0_P1
 	JMS SETFLAG_C_CY
@@ -1351,7 +1330,6 @@ CALL_P2P3:
 CODE_CEH:			; ACI B2
 	JMS LD_P1_PM16REG16P0_INCREMENT ; P1=PM(REG(PC)++)
 ACI_P1:
-	SETFLAG_SUB_0
 	JMS GETFLAG_C
 	JCN Z, ACI_P1_NOCARRY
 	JMS INC_P1
@@ -1402,7 +1380,6 @@ CODE_D5H:			; PUSH D
 CODE_D6H:			; SUI B2
 	JMS LD_P1_PM16REG16P0_INCREMENT ; P1=PM(REG(PC)++)
 SUI_P1:
-	SETFLAG_SUB_1
 	FIM P0, REG8_A
 	JMS SUB_REG8P0_P1
 	JMS SETFLAG_C_CY
@@ -1442,7 +1419,6 @@ CODE_DDH:			; ...
 CODE_DEH:			; SBI B2
 	JMS LD_P1_PM16REG16P0_INCREMENT ; P1=PM(REG(PC)++)
 SBI_P1:
-	SETFLAG_SUB_1
 	JMS GETFLAG_C
 	JCN Z, SBI_P1_NOCARRY
 	JMS INC_P1
@@ -1649,7 +1625,6 @@ CODE_FDH:			; ...
 CODE_FEH:			; CPI
 	JMS LD_P1_PM16REG16P0_INCREMENT ; P1=PM(REG(PC)++)
 CPI_P1:
-	SETFLAG_SUB_1
 	FIM P6, REG8_SRC
 	FIM P7, REG8_A
 	JMS LD_REG8P6_REG8P7
@@ -1729,40 +1704,6 @@ GETFLAG_P:
 GETFLAG_P_0:
 	endif 			; EMU_USE_FLAG_P
 	BBL 0
-	
-;;;---------------------------------------------------------------------------
-;;; DAA_SETFLAG_SUB_0
-;;; DAA_SETFLAG_SUB_1
-;;; FLAG_SUB is compiled only if EMU_USE_DAA
-;;;---------------------------------------------------------------------------
-
-	if EMU_USE_DAA
-DAA_SETFLAG_SUB_0:
-	FIM P7, REG4_FLAG_SZBH
-	SRC P7
-	RDM
-	RAR
-	RAR
-	CLC
-RAL_RAL_WRM_BBL0:
-	RAL
-	RAL
-	WRM
-	BBL 0
-
-DAA_SETFLAG_SUB_1:
-	FIM P7, REG4_FLAG_SZBH
-	SRC P7
-	RDM
-	RAR
-	RAR
-	STC
-	JUN RAL_RAL_WRM_BBL0
-;;; 	RAL
-;;; 	RAL
-;;; 	WRM
-;;; 	BBL 0
-	endif		; EMU_USE_DAA
 	
 ;;;---------------------------------------------------------------------------
 ;;; SETFLAG_C_{CY, 0, 1}
