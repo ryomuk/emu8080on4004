@@ -30,7 +30,8 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
 - 通信ポート: 9600bps Software Serial UART (TTL level)
 
 ## ToDO
-- プリント基板作成
+- メモリ64KBに拡張
+- プリント基板作成(基板発注済(2023/4/8)．ガーバーファイル等は近日公開予定)
 
 ## 動画
 Youtubeで関連動画を公開しています．
