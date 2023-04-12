@@ -1,0 +1,145 @@
+ AS V1.42 Beta [Bld 236] - Source File test7.asm - Page 1 - 2023/03/20 13:22:58
+
+
+       1/       0 :                     ;;; test7.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; CALL, RET, PUSH, POP
+       4/       0 :                     
+       5/       0 :                     	CPU	8080
+       6/       0 :                     	org 0000H
+       7/       0 :                     START:
+       8/       0 : 31 D0 0F            	LXI SP, 0FD0H
+       9/       3 : 3E FF               	MVI A, 0FFH		;A=FF
+      10/       5 : C6 01               	ADI 01H			;A=00, SZC=011
+      11/       7 : 3E 12               	MVI A, 12H		;A=12
+      12/       9 :                     
+      13/       9 : 01 34 12            	LXI B, 1234H		;BC=1234
+      14/       C : 11 78 56            	LXI D, 5678H		;DC=5678
+      15/       F : 21 BC 9A            	LXI H, 9ABCH		;HL=9ABC
+      16/      12 :                     
+      17/      12 : F5                  	PUSH PSW
+      18/      13 : C5                  	PUSH B
+      19/      14 : D5                  	PUSH D
+      20/      15 : E5                  	PUSH H
+      21/      16 :                     
+      22/      16 : AF                  	XRA A			; A=0, SZC=000
+      23/      17 : 01 CC BB            	LXI B, 0BBCCH		;BC=BBCC
+      24/      1A : 11 EE DD            	LXI D, 0DDEEH		;DE=DDEE
+      25/      1D : 21 12 12            	LXI H, 1212H		;HL=1212
+      26/      20 :                     
+      27/      20 : E1                  	POP H
+      28/      21 : D1                  	POP D
+      29/      22 : C1                  	POP B
+      30/      23 : F1                  	POP PSW
+      31/      24 :                     	
+      32/      24 : CD 23 01            	CALL CHECK_RET
+      33/      27 :                     
+      34/      27 :                     	;; check false condition
+      35/      27 : AF                  	XRA A			;A=00, SZC=010
+      36/      28 : C6 01               	ADI 01H			;A=01, SZC=000
+      37/      2A : DC 5C 00            	CC CALL_ERROR
+      38/      2D : FC 5C 00            	CM CALL_ERROR
+      39/      30 : CC 5C 00            	CZ CALL_ERROR
+      40/      33 :                     
+      41/      33 : DE 01               	SBI 01H			;A=00, SZC=010
+      42/      35 : C4 5C 00            	CNZ CALL_ERROR
+      43/      38 : DE 01               	SBI 01H			;A=FF, SZC=101
+      44/      3A : D4 5C 00            	CNC CALL_ERROR
+      45/      3D : F4 5C 00            	CP CALL_ERROR
+      46/      40 :                     
+      47/      40 : AF                  	XRA A
+      48/      41 : CC 00 02            	CZ CHECK_RZ
+      49/      44 :                     
+      50/      44 : AF                  	XRA A
+      51/      45 : C6 01               	ADI 01H
+      52/      47 : C4 03 02            	CNZ CHECK_RNZ
+      53/      4A :                     
+      54/      4A : AF                  	XRA A
+      55/      4B : D4 09 02            	CNC CHECK_RNC
+      56/      4E : DE 01               	SBI 01H
+      57/      50 : DC 06 02            	CC CHECK_RC
+      58/      53 :                     
+      59/      53 : AF                  	XRA A
+      60/      54 : F4 0F 02            	CP CHECK_RP
+ AS V1.42 Beta [Bld 236] - Source File test7.asm - Page 2 - 2023/03/20 13:22:58
+
+
+      61/      57 : DE 01               	SBI 01H
+      62/      59 : FC 0C 02            	CM CHECK_RM
+      63/      5C :                     CALL_ERROR:
+      64/      5C : 76                  	HLT
+      65/      5D :                     
+      66/     123 :                     	org 0123H
+      67/     123 :                     CHECK_RET:
+      68/     123 : 3E AB               	MVI A, 0ABH
+      69/     125 : C9                  	RET
+      70/     126 : 76                  	HLT
+      71/     127 :                     
+      72/     200 :                     	org 0200H
+      73/     200 :                     CHECK_RZ:
+      74/     200 : C0                  	RNZ
+      75/     201 : C8                  	RZ
+      76/     202 : 76                  	HLT
+      77/     203 :                     CHECK_RNZ:
+      78/     203 : C8                  	RZ
+      79/     204 : C0                  	RNZ
+      80/     205 : 76                  	HLT
+      81/     206 :                     CHECK_RC:
+      82/     206 : D0                  	RNC
+      83/     207 : D8                  	RC
+      84/     208 : 76                  	HLT
+      85/     209 :                     CHECK_RNC:
+      86/     209 : D8                  	RC
+      87/     20A : D0                  	RNC
+      88/     20B : 76                  	HLT
+      89/     20C :                     CHECK_RM:
+      90/     20C : F0                  	RP
+      91/     20D : F8                  	RM
+      92/     20E : 76                  	HLT
+      93/     20F :                     CHECK_RP:
+      94/     20F : F8                  	RM
+      95/     210 : F0                  	RP
+      96/     211 : 76                  	HLT
+      97/     212 :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test7.asm - Page 3 - 2023/03/20 13:22:58
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+ CALL_ERROR :                    5C C | *CASESENSITIVE :                  0 - |
+ CHECK_RC :                     206 C |  CHECK_RET :                    123 C |
+ CHECK_RM :                     20C C |  CHECK_RNC :                    209 C |
+ CHECK_RNZ :                    203 C |  CHECK_RP :                     20F C |
+ CHECK_RZ :                     200 C | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/20" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - | *START :                          0 C |
+*TIME :                  "13:22:58" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     31 symbols
+     23 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test7.asm - Page 4 - 2023/03/20 13:22:58
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.01 seconds assembly time
+
+     98 lines source file
+      2 passes
+      0 errors
+      0 warnings

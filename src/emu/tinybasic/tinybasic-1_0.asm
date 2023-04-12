@@ -11,7 +11,7 @@
 ;
 ; modified for emu8080on4004
 ; by Ryo Mukai
-; 21 March 2023
+; 12 April 2023
 ; This source can be assembled with the Macroassembler AS
 ; (http://john.ccac.rwth-aachen.de:8000/as/)
 ;
@@ -1553,8 +1553,7 @@ LOPPT:  DW   0                          ;TEXT POINTER
 RANPNT: DW   START                      ;RANDOM NUMBER POINTER
 TXTUNF: DW   TXTBGN                     ;->UNFILLED TEXT AREA
 TXTBGN: DS   1                          ;TEXT SAVE AREA BEGINS
-;;;     ORG  1F00H			;for emu8080on4004
-        ORG  0F00H
+	ORG  1F00H
 TXTEND  EQU  $                          ;TEXT SAVE AREA ENDS
 VARBGN: DS   2*27                       ;VARIABLE @(0)
         DS   1                          ;EXTRA BYTE FOR BUFFER
@@ -1562,8 +1561,7 @@ BUFFER: DS   72                         ;INPUT BUFFER
 BUFEND  EQU  $                          ;BUFFER ENDS
         DS   40                         ;EXTRA BYTES FOR STACK
 STKLMT  EQU  $                          ;TOP LIMIT FOR STACK
-;;;     ORG  2000H
-	ORG  0FD0H			;for emu8080on4004
+	ORG  2000H
 STACK   EQU  $                          ;STACK STARTS HERE
 
         END

@@ -1,0 +1,129 @@
+ AS V1.42 Beta [Bld 236] - Source File test8.asm - Page 1 - 2023/03/20 18:20:59
+
+
+       1/       0 :                     ;;; test8.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; condition JMP, RST, IN, OUT
+       4/       0 :                     	CPU	8080
+       5/       0 :                     	org 0000H		;RST0
+       6/       0 : C3 39 00            	JMP START
+       7/       8 :                     	org 0008H		;RST1
+       8/       8 : C9                  	RET
+       9/      10 :                     	org 0010H		;RST2
+      10/      10 : C9                  	RET
+      11/      18 :                     	org 0018H		;RST3
+      12/      18 : C9                  	RET
+      13/      20 :                     	org 0020H		;RST4
+      14/      20 : C9                  	RET
+      15/      28 :                     	org 0028H		;RST5
+      16/      28 : C9                  	RET
+      17/      30 :                     	org 0030H		;RST6
+      18/      30 : C9                  	RET
+      19/      38 :                     	org 0038H		;RST7
+      20/      38 : C9                  	RET
+      21/      39 :                     	
+      22/      39 :                     START:
+      23/      39 : 31 00 0F            	LXI SP, 0F00H
+      24/      3C : CF                  	RST 1
+      25/      3D : D7                  	RST 2
+      26/      3E : DF                  	RST 3
+      27/      3F : E7                  	RST 4
+      28/      40 : EF                  	RST 5
+      29/      41 : F7                  	RST 6
+      30/      42 : FF                  	RST 7
+      31/      43 :                     
+      32/      43 : AF                  	XRA A
+      33/      44 : CA 48 00            	JZ L1
+      34/      47 : 76                  	HLT
+      35/      48 :                     L1:	
+      36/      48 : C6 01               	ADI 1
+      37/      4A : C2 4E 00            	JNZ L2
+      38/      4D : 76                  	HLT
+      39/      4E :                     L2:	
+      40/      4E : 37                  	STC
+      41/      4F : DA 53 00            	JC L3
+      42/      52 : 76                  	HLT
+      43/      53 :                     L3:	
+      44/      53 : 3F                  	CMC
+      45/      54 : D2 58 00            	JNC L4
+      46/      57 : 76                  	HLT
+      47/      58 :                     L4:	
+      48/      58 : AF                  	XRA A
+      49/      59 : F2 5D 00            	JP L5
+      50/      5C : 76                  	HLT
+      51/      5D :                     L5:	
+      52/      5D : DE 10               	SBI 10H
+      53/      5F : FA 63 00            	JM L6
+      54/      62 : 76                  	HLT
+      55/      63 :                     L6:	
+      56/      63 : AF                  	XRA A
+      57/      64 : C2 86 00            	JNZ ERR
+      58/      67 : DA 86 00            	JC ERR
+      59/      6A : FA 86 00            	JM  ERR
+      60/      6D :                     
+ AS V1.42 Beta [Bld 236] - Source File test8.asm - Page 2 - 2023/03/20 18:20:59
+
+
+      61/      6D : DE 10               	SBI 10H
+      62/      6F : CA 86 00            	JZ ERR
+      63/      72 : D2 86 00            	JNC ERR
+      64/      75 : F2 86 00            	JP  ERR
+      65/      78 :                     
+      66/      78 : AF                  	XRA A
+      67/      79 : DB 00               	IN 00H
+      68/      7B : DB 01               	IN 01H
+      69/      7D :                     	
+      70/      7D : 3E AB               	MVI A, 0ABH
+      71/      7F : D3 00               	OUT 00H
+      72/      81 : D3 01               	OUT 01H
+      73/      83 :                     
+      74/      83 : F3                  	DI
+      75/      84 : FB                  	EI
+      76/      85 :                     	
+      77/      85 : C7                  	RST 0
+      78/      86 :                     ERR:
+      79/      86 : 76                  	HLT
+      80/      87 :                     
+      81/      87 :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test8.asm - Page 3 - 2023/03/20 18:20:59
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/20" - |
+ ERR :                           86 C | *FALSE :                          0 - |
+*FULLPMMU :                       1 - | *HAS64 :                          1 - |
+*HASFPU :                         0 - | *HASPMMU :                        0 - |
+*INSUPMODE :                      0 - |  L1 :                            48 C |
+ L2 :                            4E C |  L3 :                            53 C |
+ L4 :                            58 C |  L5 :                            5D C |
+ L6 :                            63 C | *LISTON :                         1 - |
+*MACEXP :                         7 - | *MOMCPU :                      8080 - |
+*MOMCPUNAME :                "8080" - | *NESTMAX :                      100 - |
+*PADDING :                        1 - | *RELAXED :                        0 - |
+ START :                         39 C | *TIME :                  "18:20:59" - |
+*TRUE :                           1 - | *VERSION :                     142F - |
+*Z80SYNTAX :                      0 - |
+
+     30 symbols
+     22 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test8.asm - Page 4 - 2023/03/20 18:20:59
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.01 seconds assembly time
+
+     82 lines source file
+      2 passes
+      0 errors
+      0 warnings

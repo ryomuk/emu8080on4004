@@ -5,7 +5,6 @@ This document is written mostly in Japanese.
 If necessary, please use a translation service such as DeepL (I recommend this) or Google.
 
 ![](images/title.jpg)
-![](images/basic.jpg)
 
 ## 概要
 自作の4004実験用ボードと，その上で動作する8080エミュレータです．Palo Alot Tiny BASICがほぼそのまま動くレベルの機能が実現できています．
@@ -17,7 +16,8 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
 - IN命令は4004ボードのソフトウェアで実装されたUARTのGETCHARを呼ぶので，入力されるまで止まります．
 - OUT命令はAレジスタを4004ボードのシリアルポートに出力します．
 
-## 実験用ボードの仕様
+## 実験ボードの仕様
+### ブレッドボード版プロトタイプ
 - CPU: Intel 4004
 - Clock: 740kHz
 - DATA RAM: 4002-1 x 2 + 4002-2 x 2 (計320bit x 4)
@@ -26,8 +26,14 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
     - 000H〜EFFHの3.75KB利用可能
   - RAM: HM6268(4k x 4bit SRAM)x 2個
     - 物理メモリ F00H〜FFDHの254byte x 16バンク
-      (上記を論理メモリ 000H〜FDFHにマッピングしてアクセスします．)
+      (上記を論理メモリ 000H〜FDFHにマッピングしてアクセス)
 - 通信ポート: 9600bps Software Serial UART (TTL level)
+
+### Rev.2.1版(ブレッドボード版との差分)
+- Program Memory
+  - RAM: HM6242566(1Mbit(256k x 4bit) SRAM)x 2個
+    - 物理メモリ F00H〜FFDHの254byte x 256バンク
+      (上記を論理メモリ 0000H〜FDFFHにマッピングしてアクセス)
 
 ## ToDO
 - メモリ64KBに拡張
@@ -58,7 +64,17 @@ Youtubeで関連動画を公開しています．
 ### 開発環境
 - [The Macroassembler AS](http://john.ccac.rwth-aachen.de:8000/as/)
 
-
 ## 更新履歴
 - 2023/3/21: 初版公開
 - 2023/4/3: SUBフラグ(NEC uPD8080A, uCOM-80用)に関するコードを削除
+- 2023/4/12: 基板(Rev.2.1)作成
+
+## 画像集
+- ブレッドボード版のプロトタイプ
+![](images/prototype.jpg)
+- プロトタイプでPalo Alto BASIC実行
+![](images/basic.jpg)
+- Rev.2.1基板
+![](images/board_rev2_1.jpg)
+- ブレッドボード版とRev.2.1基板
+![](images/two_boards.jpg)

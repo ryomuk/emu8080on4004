@@ -1,0 +1,81 @@
+;;; test8.asm
+;;; 
+;;; condition JMP, RST, IN, OUT
+	CPU	8080
+	org 0000H		;RST0
+	JMP START
+	org 0008H		;RST1
+	RET
+	org 0010H		;RST2
+	RET
+	org 0018H		;RST3
+	RET
+	org 0020H		;RST4
+	RET
+	org 0028H		;RST5
+	RET
+	org 0030H		;RST6
+	RET
+	org 0038H		;RST7
+	RET
+	
+START:
+	LXI SP, 0F00H
+	RST 1
+	RST 2
+	RST 3
+	RST 4
+	RST 5
+	RST 6
+	RST 7
+
+	XRA A
+	JZ L1
+	HLT
+L1:	
+	ADI 1
+	JNZ L2
+	HLT
+L2:	
+	STC
+	JC L3
+	HLT
+L3:	
+	CMC
+	JNC L4
+	HLT
+L4:	
+	XRA A
+	JP L5
+	HLT
+L5:	
+	SBI 10H
+	JM L6
+	HLT
+L6:	
+	XRA A
+	JNZ ERR
+	JC ERR
+	JM  ERR
+
+	SBI 10H
+	JZ ERR
+	JNC ERR
+	JP  ERR
+
+	XRA A
+	IN 00H
+	IN 01H
+	
+	MVI A, 0ABH
+	OUT 00H
+	OUT 01H
+
+	DI
+	EI
+	
+	RST 0
+ERR:
+	HLT
+
+	END

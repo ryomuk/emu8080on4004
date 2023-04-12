@@ -3,7 +3,7 @@
 ;;; for Intel 4004 evaluation board
 ;;;
 ;;; by Ryo Mukai
-;;; 2023/03/21
+;;; 2023/04/09
 ;;;---------------------------------------------------------------------------
 
 ;;;---------------------------------------------------------------------------
@@ -19,6 +19,8 @@
 ;;; Software Configuration
 ;;;---------------------------------------------------------------------------
 
+;;; ENABLE_MEMTEST = 0
+ENABLE_MEMTEST = 1			; memory test command 'T'
 
 ;;;---------------------------------------------------------------------------
 ;;; Emulator compile configuration
@@ -34,7 +36,8 @@ EMU_UARTRC	equ	00H	; for tinybasic-1.0
 EMU_UARTRD	equ	01H	; for tynybasic-1.0
 ;;;	EMU_IN_UARTRC_VALUE	equ 22H	; for tynybasic-1.0
 EMU_IN_UARTRC_VALUE	equ 0FFH	;
-
+EMU_IN_STOPCODE	equ 03H			; ctrl-C
+	
 ;;;---------------------------------------------------------------------------
 ;;; Hardware Configuration
 ;;;---------------------------------------------------------------------------
@@ -91,7 +94,7 @@ PM_READ_P0_P1	equ 0FFEH	; Entry of the subroutine to read RAM
 	
 ;;; Address labels in the 16 bit address space logical program memory PM16
 PM16_MEMSTART	equ 0000H
-PM16_LINEBUF	equ 0D00H
+PM16_LINEBUF	equ 0FD00H
 
 ;;; for 256 x 16 x16 PM space
 ;;; PM_READ_P0_P1   equ 0F7EH	; Entry of the subroutine to read RAM
@@ -138,12 +141,15 @@ REG8_ADDRH	equ REG16_ADDR+2
 REG4_FLAG_1P1C	equ REG8_FLAG
 REG4_FLAG_SZBH	equ REG8_FLAG+1
 
-REG4_EMU_STEP	equ 20H	; Execution mode (0:continuous, 1:step)
+REG8_EMU_KEYBUF equ 20H ; virtual buffer for input STOP key
+REG4_EMU_STEP	equ 24H	; Execution mode (0:continuous, 1:step)
 	
 REG16_MON_INDEX	equ 28H	;
 REG16_MON_ADDR	equ 2CH	;
 REG16_MON_TMP	equ 30H	;
-REG16_MON_PMBANK	equ 34H	;
+REG8_MON_TMP	equ 30H	;
+REG8_MON_TMP2	equ 32H	;
+REG16_MON_PMBANK	equ 34H	; not used (?)
 REG8_MON_MEMSPACE	equ 38H	; 'D', 'P', 'L' = (Data, Physical, Logical)
 REG8_MON_RESERVED	equ 3AH	; (reserved)
 	
@@ -164,6 +170,19 @@ STACK_INIT	equ 80H
 
 ;;;---------------------------------------------------------------------------
 ;;; Mail Loop for Monitor Program
+;;; 
+;;; Command:
+;;; H : Select memory space
+;;;   HD : Data RAM (4002)
+;;;   HP : Physical Program Memory
+;;;   HL : Logical Program Memory
+;;; D : Dump memory
+;;; L : Load Intel hex to logical program memory
+;;; C : Clear Program Memory
+;;; G : Go to PM_RAM_START (0F00H)
+;;; E : 8080 Emulator
+;;;   ES : 8080 Emulator (step mode)
+;;; 
 ;;;---------------------------------------------------------------------------
 MAIN:
 	NOP
@@ -256,7 +275,7 @@ L5:
 L6:
 	FIM P7, 'E'		; jump to 8080 Emulator
 	JMS CMP_P1P7 		;
-	JCN ZN, L10		;
+	JCN ZN, L7		;
 
 	JMS LD_P1_PM16REG16P0_INCREMENT ; check next letter
 	JMS TOUPPER_P1
@@ -271,17 +290,51 @@ L6_CONTINUOUS			; continuous mode
 L6_SETMODE:
 	FIM P7, REG4_EMU_STEP
 	LD_REG4P7_ACC
-	FIM P1, REG16_PC	; set start PC if designated
-	JMS GETHEX_REG16P1_PM16REG16P0_INCREMENT
 	JUN COMMAND_E
 
-
+L7:
+	if ENABLE_MEMTEST
+	FIM P7, 'T'		; Test program memory
+	JMS CMP_P1P7
+	JCN ZN, L10
+	JUN COMMAND_T
+	endif
 L10:
 	FIM P0, lo(STR_CMDERR)
 	JMS PRINTSTR_P0
 
 	JUN CMD_LOOP
 
+
+;;;---------------------------------------------------------------------------
+;;; COMMAND_D
+;;; Dump Memory
+;;;---------------------------------------------------------------------------
+COMMAND_D:
+	FIM P1, REG16_MON_ADDR
+	JMS GETHEX_REG16P1_PM16REG16P0_INCREMENT
+	
+	FIM P7, REG8_MON_MEMSPACE
+	JMS LD_P1_REG8P7
+	
+	FIM P7, 'D'
+	JMS CMP_P1P7
+	JCN ZN, CMDD_L1
+	JUN COMMAND_DD
+CMDD_L1:
+	FIM P7, 'P'
+	JMS CMP_P1P7
+	JCN ZN, CMDD_L2
+	JUN COMMAND_DP
+CMDD_L2:
+	FIM P7, 'L'
+	JMS CMP_P1P7
+	JCN ZN, CMDD_L3
+	JUN COMMAND_DL
+CMDD_L3:
+	FIM P0, lo(STR_ERROR_UNKNOWN_MEMSPACE)
+	JMS PRINTSTR_P0
+	JUN CMD_LOOP
 
 ;;;---------------------------------------------------------------------------
 ;;; COMMAND_DP
@@ -327,6 +380,10 @@ CMDDP_EXIT:
 
 	JUN CMD_LOOP		; return to command loop
 
+	NOP
+	NOP
+	NOP
+	NOP
 ;;;---------------------------------------------------------------------------
 ;;; COMMAND_DL
 ;;; Dump Logical Memory
@@ -351,37 +408,6 @@ CMDDL_L1:
 	ISZ CNT_I, CMDDL_L0
 CMDDL_NEXT:
 	JUN CMD_LOOP		; return to command loop
-
-	
-;;;---------------------------------------------------------------------------
-;;; COMMAND_D
-;;; Dump Memory
-;;;---------------------------------------------------------------------------
-COMMAND_D:
-	FIM P1, REG16_MON_ADDR
-	JMS GETHEX_REG16P1_PM16REG16P0_INCREMENT
-	
-	FIM P7, REG8_MON_MEMSPACE
-	JMS LD_P1_REG8P7
-	
-	FIM P7, 'D'
-	JMS CMP_P1P7
-	JCN ZN, CMDD_L1
-	JUN COMMAND_DD
-CMDD_L1:
-	FIM P7, 'P'
-	JMS CMP_P1P7
-	JCN ZN, CMDD_L2
-	JUN COMMAND_DP
-CMDD_L2:
-	FIM P7, 'L'
-	JMS CMP_P1P7
-	JCN ZN, CMDD_L3
-	JUN COMMAND_DL
-CMDD_L3:
-	FIM P0, lo(STR_ERROR_UNKNOWN_MEMSPACE)
-	JMS PRINTSTR_P0
-	JUN CMD_LOOP
 
 ;;;---------------------------------------------------------------------------
 ;;; COMMAND_DD
@@ -532,8 +558,8 @@ CMDL_EXIT:
 ;;; Clear Program Memory
 ;;;---------------------------------------------------------------------------
 COMMAND_C:
-	FIM CNT, loops(1, 16)
-;;;	FIM CNT, loops(16, 16)
+;;; 	FIM CNT, loops(1, 16)
+	FIM CNT, loops(16, 16)
 CMDPMC_BANKLOOP:
 	LD_P1_CNT
 	JMS PM_SELECTPMB_P1
@@ -557,6 +583,8 @@ CMDPMC_L1:
 ;;; 8080 emulator main loop
 ;;;---------------------------------------------------------------------------
 COMMAND_E:
+	FIM P1, REG16_PC	; set start PC if designated
+	JMS GETHEX_REG16P1_PM16REG16P0_INCREMENT
 EMU_START:
 	FIM P0, lo(STR_EMU_MESSAGE)
 	JMS PRINTSTR_P0
@@ -598,8 +626,6 @@ CODE_007F:			; 00H<=CODE<=7FH
 	JCN CN, CODE_003F	; 00H<=CODE<=3FH
 	JUN CODE_407F		; 40H<=CODE<=7FH
 ;;;---------------------------------------------------------------------------
-	NOP
-	NOP
 CODE_003F:			; 00H<=CODE<=3FH
 	LD P1_LO
 	JCN NZ,CODE_NOT_NOP
@@ -1017,9 +1043,9 @@ CODE_27H:			; DAA
 	JMS LD_P1_REG8P0
 	LD P1_LO
 	DAA
-	XCH P1_LO
+	XCH P1_LO		; P1_LO=DAA(P1_LO), CY=0 or 1
 	LDM 0
-	ADD P1_HI
+	ADD P1_HI		; ACC=P1_HI+CY
 	DAA
 	XCH P1_HI
 	
@@ -2572,68 +2598,6 @@ GETHEX_EXIT:
 	JUN LD_REG16P1_P2P3
 ;;;	BBL 0
 
-;;;----------------------------------------------------------------------------
-;;; EMULATE_OUT_P1
-;;; Emulate OUT instruction
-;;;----------------------------------------------------------------------------
-EMULATE_OUT_P1:
-	FIM P7, EMU_UARTRD
-	JMS CMP_P1P7
-	JCN ZN, EMU_OUT_P1_L1
-	JUN EMU_OUT_UARTRD
-EMU_OUT_P1_L1:
-	FIM P7, EMU_UARTRC
-	JMS CMP_P1P7
-	JCN ZN, EMU_OUT_P1_L2
-	JUN EMU_OUT_UARTRC
-EMU_OUT_P1_L2:
-	BBL 0
-
-EMU_OUT_UARTRD:
-	FIM P1, REG8_A
-	JMS LD_P1_REG8P1
-	JUN PUTCHAR_P1
-;;;	BBL 0
-EMU_OUT_UARTRC:			; do nothing
-	BBL 0
-	
-;;;----------------------------------------------------------------------------
-;;; EMULATE_IN_P1
-;;; Emulate IN instruction
-;;;----------------------------------------------------------------------------
-EMULATE_IN_P1:
-	FIM P7, EMU_UARTRD
-	JMS CMP_P1P7
-	JCN ZN, EMU_IN_P1_L1
-	JUN EMU_IN_UARTRD
-EMU_IN_P1_L1:
-	FIM P7, EMU_UARTRC
-	JMS CMP_P1P7
-	JCN ZN, EMU_IN_P1_L2
-	JUN EMU_IN_UARTRC
-EMU_IN_P1_L2:
-	BBL 0
-
-EMU_IN_UARTRD:
-	JMS GETCHAR_P1
-	FIM P7, 1BH		; ESC
-	JMS CMP_P1P7
-	JCN Z, EMU_IN_EXIT
-	
-	FIM P0, REG8_A
-	JUN LD_REG8P0_P1
-;;;	BBL 0
-
-EMU_IN_UARTRC:
-	FIM P0, REG8_A
-	FIM P1, EMU_IN_UARTRC_VALUE
-	JUN LD_REG8P0_P1
-;;;	BBL 0
-
-EMU_IN_EXIT:
-	JMS PRINT_CRLF
-	JMS EMU_PRINT_REGISTERS
-	JUN CMD_LOOP
 	
 ;;;----------------------------------------------------------------------------
 ;;; EMU_PRINT_REGISTERS
@@ -2724,6 +2688,89 @@ EMU_PRINT_REGISTERS:
 
 
 	
+;;;----------------------------------------------------------------------------
+;;; EMULATE_OUT_P1
+;;; Emulate OUT instruction
+;;;----------------------------------------------------------------------------
+EMULATE_OUT_P1:
+	FIM P7, EMU_UARTRD
+	JMS CMP_P1P7
+	JCN ZN, EMU_OUT_P1_L1
+	JUN EMU_OUT_UARTRD
+EMU_OUT_P1_L1:
+	FIM P7, EMU_UARTRC
+	JMS CMP_P1P7
+	JCN ZN, EMU_OUT_P1_L2
+	JUN EMU_OUT_UARTRC
+EMU_OUT_P1_L2:
+	BBL 0
+
+EMU_OUT_UARTRD:
+	FIM P1, REG8_A
+	JMS LD_P1_REG8P1
+	JUN PUTCHAR_P1
+;;;	BBL 0
+EMU_OUT_UARTRC:			; do nothing
+	BBL 0
+	
+;;;----------------------------------------------------------------------------
+;;; EMULATE_IN_P1
+;;; Emulate IN instruction
+;;;----------------------------------------------------------------------------
+EMULATE_IN_P1:
+	FIM P7, EMU_UARTRD
+	JMS CMP_P1P7
+	JCN ZN, EMU_IN_P1_L1
+	JUN EMU_IN_UARTRD
+EMU_IN_P1_L1:
+	FIM P7, EMU_UARTRC
+	JMS CMP_P1P7
+	JCN ZN, EMU_IN_P1_L2
+	JUN EMU_IN_UARTRC
+EMU_IN_P1_L2:
+	BBL 0
+
+EMU_IN_UARTRD:
+	FIM P7, REG8_EMU_KEYBUF
+	JMS LD_P1_REG8P7
+	
+	JMS ISZEROORNOT_P1
+	JCN ZN, EMU_IN_UARTRD_SKIPGETCHAR
+	JMS GETCHAR_P1
+EMU_IN_UARTRD_SKIPGETCHAR:
+	FIM P7, 1BH		; ESC
+	JMS CMP_P1P7
+	JCN Z, EMU_IN_EXIT_TO_MONITOR
+	
+	FIM P0, REG8_A
+	JMS LD_REG8P0_P1
+
+	FIM P7, REG8_EMU_KEYBUF
+	FIM P1, 00H
+	JUN LD_REG8P7_P1
+;;;	BBL 0
+
+EMU_IN_EXIT_TO_MONITOR:
+	JMS PRINT_CRLF
+	JMS EMU_PRINT_REGISTERS
+	JUN CMD_LOOP
+
+;;; if ~test button is on then wait for the button released,
+;;; and set flag to return "STOP" code on the next "IN URTRD" 
+EMU_IN_UARTRC:
+	JCN T, EMU_IN_UARTRC_EXIT
+	JCN TN, $
+	FIM P0, REG8_EMU_KEYBUF
+	FIM P1, EMU_IN_STOPCODE
+	JUN LD_REG8P0_P1
+	
+EMU_IN_UARTRC_EXIT:
+	FIM P0, REG8_A
+	FIM P1, EMU_IN_UARTRC_VALUE
+	JUN LD_REG8P0_P1
+;;;	BBL 0
+
+
 ;;;---------------------------------------------------------------------------
 ;;; JIN_P2_CODE_80BF
 ;;; Jump table for CODE 80H to BFH
@@ -2973,28 +3020,26 @@ LD_P1_PM16REG16P0_INCREMENT:
 	LD_P6_P0		; P6 = P0
 	SRC P6
 	RDM			; ACC=REG(P0).bit3210
-
 	FIM P7, CHIP_PMSELECT0
 	SRC P7
 	WMP			; set bank_low to REG(P0).bit3210
 
 	INC P6_LO
 	SRC P6
-	RDM
-	XCH P0_LO		; P0_LO=REG(P0).bit7654
+	RDM			; ACC=REG(P0).bit7654
+	FIM P7, CHIP_PMSELECT1
+	SRC P7
+	WMP			; set bank_high to REG(P0).bit7654
+
+	INC P6_LO
+	SRC P6
+	RDM			; ACC=REG(P0).bitBA98
+	XCH P0_LO		; P0_LO=REG(P0).bitBA98
 	
 	INC P6_LO
 	SRC P6
-	RDM
-	XCH P0_HI		; P0_HI=REG(P0).bitBA98
-
-	INC P6_LO
-	SRC P6
-	RDM
-
-	FIM P7, CHIP_PMSELECT1
-	SRC P7
-	WMP			; set bank_high to REG(P0).bitFEDC
+	RDM			; ACC=REG(P0).bitFEDC
+	XCH P0_HI		; P0_HI=REG(P0).bitFEDC
 
 	JMS PM_READ_P0_P1	; P1 = PM(REG(P0))
 
@@ -3012,34 +3057,32 @@ LD_P1_PM16REG16P0_INCREMENT:
 ;;; LD_PM16REG16P0_P1
 ;;; PM16(REG(P0)) = P1
 ;;; 
-;;; destroy: P7
+;;; destroy: P6, P7
 ;;;---------------------------------------------------------------------------
 LD_PM16REG16P0_P1:
 	SRC P0
-	RDM			; bit3210 of REG(P0)
+	RDM			; ACC = bit3210 of REG(P0)
 	FIM P7, CHIP_PMSELECT0
-	SRC P7
-	WMP			; set bank to REG(P0).bit3210
-
-
-	INC P0_LO
-	SRC P0
-	RDM			; bit7654 of REG(P0)
-	XCH P6_LO		; R13 = REG(P0).bit7654
+	SRC P7			; ACC=REG(P0).bit3210
+	WMP			; set bank_low to REG(P0).bit3210
 
 	INC P0_LO
 	SRC P0
-	RDM
-	XCH P6_HI		; R12 = REG(P0).bitBA98
-	
-	INC P0_LO
-	SRC P0
-	RDM
-
+	RDM			; ACC = bit7654 of REG(P0)
 	FIM P7, CHIP_PMSELECT1
 	SRC P7
-	WMP			; set bank_high to REG(P0).bitFEDC
+	WMP			; set bank_high to REG(P0).bit7654
 
+	INC P0_LO
+	SRC P0
+	RDM			; ACC = bitBA98 of REG(P0)
+	XCH P6_LO		; P6_LO = REG(P0).bitBA98
+
+	INC P0_LO
+	SRC P0
+	RDM			; ACC = bitFEDC of REG(P0)
+	XCH P6_HI		; P6_HI = REG(P0).bitFEDC
+	
 	SRC P6
 	LD P1_LO
 	WPM
@@ -3412,27 +3455,6 @@ ISALPHA_L20:
 ISALPHA_FALSE:
 	BBL 0
 
-;;;---------------------------------------------------------------------------
-;;; CTOI_P1
-;;; convert character ('0'...'f') to value 0000 ... 1111
-;;; no error check
-;;; input: P1(R2R3)
-;;; output: P1_LO, (P1_HI=0)
-;;;---------------------------------------------------------------------------
-CTOI_P1:
-	CLB
-	LDM 3
-	SUB P1_HI
-	JCN Z, CTOI_09	; check upper 4bit
-	CLB
-	LDM 9
-	ADD P1_LO
-	XCH P1_LO		; P1_HI = P1_LO+ 9 for 'a-fA-F'
-CTOI_09:
-	CLB
-	XCH R2			; R2 = 0
-	BBL 0
-	
 ;;;----------------------------------------------------------------------------
 ;;; ISHEX_P1
 ;;; check P1 is a hex digit letter ('0' to '9') or ('a' to 'f') or ('A' to 'F')
@@ -3440,6 +3462,9 @@ CTOI_09:
 ;;;	    ACC=1 if P1 is a hex digit letter
 ;;; destroy: P7
 ;;;----------------------------------------------------------------------------
+	NOP
+	NOP
+	NOP
 ISHEX_P1:
 	FIM P7, '0'
 	JMS CMP_P1P7
@@ -3473,6 +3498,27 @@ ISHEX_L20:
 ISHEX_FALSE:
 	BBL 0
 
+;;;---------------------------------------------------------------------------
+;;; CTOI_P1
+;;; convert character ('0'...'f') to value 0000 ... 1111
+;;; no error check
+;;; input: P1(R2R3)
+;;; output: P1_LO, (P1_HI=0)
+;;;---------------------------------------------------------------------------
+CTOI_P1:
+	CLB
+	LDM 3
+	SUB P1_HI
+	JCN Z, CTOI_09	; check upper 4bit
+	CLB
+	LDM 9
+	ADD P1_LO
+	XCH P1_LO		; P1_HI = P1_LO+ 9 for 'a-fA-F'
+CTOI_09:
+	CLB
+	XCH R2			; R2 = 0
+	BBL 0
+	
 ;;;---------------------------------------------------------------------------
 ;;; CMP_P1P7
 ;;; compare P1(R2R3) and P7(R14R15)
@@ -3589,6 +3635,87 @@ CMDDD_L2:
 	JUN PRINT_CRLF
 ;;;	BBL 0
 
+;;;---------------------------------------------------------------------------
+;;; Program Memory Test
+;;; This command is optional
+;;;---------------------------------------------------------------------------
+	if ENABLE_MEMTEST
+COMMAND_T:
+	LDM loop(2)
+	XCH CNT_I
+CMDT_LOOP_RW:
+	FIM P0, REG8_MON_TMP
+	FIM P1, 00H
+	JMS LD_REG8P0_P1
+	
+	FIM P2, loops(16, 16)
+CMDT_LOOPH
+	LD_P1_P2
+	FIM P0, REG8_MON_TMP
+	JMS ADD_REG8P0_P1
+	FIM P3, loops(16, 16)
+CMDT_LOOPL:
+	LD_P1_P3
+	FIM P0, REG8_MON_TMP
+	JMS ADD_REG8P0_P1
+	
+	LD_P1_P2
+	FIM P7, lo(PM_READ_P0_P1)
+	JMS CMP_P1P7
+	JCN Z, CMDT_NEXT	; skip for PM_READ routine
+	FIM P7, lo(PM_READ_P0_P1+1)
+	JMS CMP_P1P7
+	JCN Z, CMDT_NEXT	; skip for PM_READ routine
+
+	FIM P0, REG16_MON_ADDR
+	JMS LD_REG16P0_P2P3
+
+	CLB
+	LDM loop(2)
+	SUB CNT_I
+	JCN Z, CMDT_WRITE
+CMDT_READ:
+	JMS LD_P1_PM16REG16P0_INCREMENT
+	FIM P0, REG8_MON_TMP2
+	JMS LD_REG8P0_P1	; REG8(TMP2)=PM(REG_ADDR)
+	FIM P7, REG8_MON_TMP
+	JMS LD_P1_REG8P7	; P1 = REG8(TMP) (correct value) 
+	JMS SUB_REG8P0_P1	; TMP2 = TMP2 - P1
+	JMS LD_P1_REG8P0	; P1 = TMP2
+	JMS ISZEROORNOT_P1
+	JCN Z, CMDT_NEXT	; check OK
+	JUN CMDT_ERROR
+CMDT_WRITE:
+	FIM P7, REG8_MON_TMP
+	JMS LD_P1_REG8P7
+	JMS LD_PM16REG16P0_P1
+CMDT_NEXT:
+	ISZ P3_LO, CMDT_LOOPL
+	ISZ P3_HI, CMDT_LOOPL
+	FIM P1, '\r'
+	JMS PUTCHAR_P1
+	LD_P1_P2
+	JMS PRINTHEX_P1
+	ISZ P2_LO, CMDT_LOOPH
+	ISZ P2_HI, CMDT_LOOPH
+
+	JMS PRINT_CRLF
+	ISZ CNT_I, CMDT_LOOP_RW
+
+	JMS PRINT_CRLF
+	JUN CMD_LOOP
+CMDT_ERROR:
+	FIM P0, lo(STR_ERROR_MEMTEST)
+	JMS PRINTSTR_P0
+	FIM P0, REG16_MON_ADDR
+	FIM P1, REG16_MON_ADDR
+	JMS DEC_REG16P0
+	JMS PRINTHEX_REG16P1
+	JMS PRINT_CRLF
+
+	JUN CMD_LOOP
+	endif			; ENABLE_MEMTEST
+	
 ;;;----------------------------------------------------------------------------
 ;;; Print subroutine and string data located in Page E (0E00H-0EFFH)
 ;;; The string data sould be located in the same page as the print routine.
@@ -3638,25 +3765,13 @@ MUL16_P2P3:
 ;;;----------------------------------------------------------------------------
 ;;; String data
 ;;;----------------------------------------------------------------------------
-
+;;;----------------------------------------------------------------------------
+;;; String data for monitor
+;;;----------------------------------------------------------------------------
 STR_OMSG:
 	data "\rIntel MCS-4 (4004) Tiny Monitor\r\n", 0
 STR_VFD_INIT:		;reset VFD and set scroll mode
 	data 1bH, 40H, 1fH, 02H, 0
-STR_EMU_MESSAGE:
-	data "\r\n8080 Emulator on 4004 Ver 1.0\r\n", 0
-
-STR_EMU_REG:
-	data "A  SZC  BC   DE   HL   SP   PC (+0 +1 +2)BC)DE)HL)SP +1)\r\n", 0
-STR_EMU_HLT:
-	data "\r\nHLT\r\n", 0
-;;; strings for register command of 4004 monitor
-;;; STR_REG0:
-;;;	data "AC	SP1111\r\n", 0
-;;; STR_REG1:
-;;;	data "CY01234567890123\r\n", 0
-;;; STR_DATAREG:
-;;;	data "0123456789ABCDEF0123\r\n", 0
 
 STR_CMDERR:
 	data "?\r\n", 0 ;
@@ -3664,6 +3779,28 @@ STR_ERROR_UNKNOWN_MEMSPACE:
 	data "?MEMSPACE\r\n", 0
 STR_ERROR_LOADCOMMAND:
 	data "?LOAD ERROR\r\n", 0
+
+	if ENABLE_MEMTEST
+STR_ERROR_MEMTEST:
+	data "MEMERR\r\n", 0
+	endif
+;;; strings for register command of 4004 monitor
+;;; STR_REG0:
+;;;	data "AC	SP1111\r\n", 0
+;;; STR_REG1:
+;;;	data "CY01234567890123\r\n", 0
+;;; STR_DATAREG:
+;;;	data "0123456789ABCDEF0123\r\n", 0
+;;;----------------------------------------------------------------------------
+;;; String data for Emulator
+;;;----------------------------------------------------------------------------
+STR_EMU_MESSAGE:
+	data "\r\n8080 Emulator on 4004 Ver 1.0\r\n", 0
+
+STR_EMU_REG:
+	data "A  SZC  BC   DE   HL   SP   PC (+0 +1 +2)BC)DE)HL)SP +1)\r\n", 0
+STR_EMU_HLT:
+	data "\r\nHLT\r\n", 0
 
 ;;;---------------------------------------------------------------------------
 ;;; Subroutine for reading program memory located on page 15 (0F00H-0FFFH)

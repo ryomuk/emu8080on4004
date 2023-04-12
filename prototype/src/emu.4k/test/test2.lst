@@ -1,0 +1,146 @@
+ AS V1.42 Beta [Bld 236] - Source File test2.asm - Page 1 - 2023/03/20 18:35:13
+
+
+       1/       0 :                     ;;; test2.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; MVI, MOV
+       4/       0 :                     
+       5/       0 :                     	CPU	8080
+       6/       0 :                     START:
+       7/       0 : 3E 12               	MVI A, 12H
+       8/       2 : 06 34               	MVI B, 34H
+       9/       4 : 0E 56               	MVI C, 56H
+      10/       6 : 16 78               	MVI D, 78H
+      11/       8 : 1E 9A               	MVI E, 9AH
+      12/       A : 26 BC               	MVI H, 0BCH
+      13/       C : 2E DE               	MVI L, 0DEH
+      14/       E :                     
+      15/       E : 7F                  	MOV A, A
+      16/       F : 47                  	MOV B, A
+      17/      10 : 4F                  	MOV C, A
+      18/      11 : 57                  	MOV D, A
+      19/      12 : 5F                  	MOV E, A
+      20/      13 : 67                  	MOV H, A
+      21/      14 : 6F                  	MOV L, A
+      22/      15 :                     
+      23/      15 : 06 34               	MVI B, 34H
+      24/      17 : 78                  	MOV A, B
+      25/      18 : 40                  	MOV B, B
+      26/      19 : 48                  	MOV C, B
+      27/      1A : 50                  	MOV D, B
+      28/      1B : 58                  	MOV E, B
+      29/      1C : 60                  	MOV H, B
+      30/      1D : 68                  	MOV L, B
+      31/      1E :                     
+      32/      1E : 0E 56               	MVI C, 56H
+      33/      20 : 79                  	MOV A, C
+      34/      21 : 41                  	MOV B, C
+      35/      22 : 49                  	MOV C, C
+      36/      23 : 51                  	MOV D, C
+      37/      24 : 59                  	MOV E, C
+      38/      25 : 61                  	MOV H, C
+      39/      26 : 69                  	MOV L, C
+      40/      27 :                     
+      41/      27 : 16 78               	MVI D, 78H
+      42/      29 : 7A                  	MOV A, D
+      43/      2A : 42                  	MOV B, D
+      44/      2B : 4A                  	MOV C, D
+      45/      2C : 52                  	MOV D, D
+      46/      2D : 5A                  	MOV E, D
+      47/      2E : 62                  	MOV H, D
+      48/      2F : 6A                  	MOV L, D
+      49/      30 :                     
+      50/      30 : 1E 9A               	MVI E, 9AH
+      51/      32 : 7B                  	MOV A, E
+      52/      33 : 43                  	MOV B, E
+      53/      34 : 4B                  	MOV C, E
+      54/      35 : 53                  	MOV D, E
+      55/      36 : 5B                  	MOV E, E
+      56/      37 : 63                  	MOV H, E
+      57/      38 : 6B                  	MOV L, E
+      58/      39 :                     
+      59/      39 : 26 BC               	MVI H, 0BCH
+      60/      3B : 7C                  	MOV A, H
+ AS V1.42 Beta [Bld 236] - Source File test2.asm - Page 2 - 2023/03/20 18:35:13
+
+
+      61/      3C : 44                  	MOV B, H
+      62/      3D : 4C                  	MOV C, H
+      63/      3E : 54                  	MOV D, H
+      64/      3F : 5C                  	MOV E, H
+      65/      40 : 64                  	MOV H, H
+      66/      41 : 6C                  	MOV L, H
+      67/      42 :                     
+      68/      42 : 2E DE               	MVI L, 0DEH
+      69/      44 : 7D                  	MOV A, L
+      70/      45 : 45                  	MOV B, L
+      71/      46 : 4D                  	MOV C, L
+      72/      47 : 55                  	MOV D, L
+      73/      48 : 5D                  	MOV E, L
+      74/      49 : 65                  	MOV H, L
+      75/      4A : 6D                  	MOV L, L
+      76/      4B :                     
+      77/      4B : 21 45 03            	LXI H, 345H
+      78/      4E : 3E 01               	MVI A, 01H
+      79/      50 : 06 02               	MVI B, 02H
+      80/      52 : 0E 03               	MVI C, 03H
+      81/      54 : 16 04               	MVI D, 04H
+      82/      56 : 1E 05               	MVI E, 05H
+      83/      58 : 77                  	MOV M, A
+      84/      59 : 70                  	MOV M, B
+      85/      5A : 71                  	MOV M, C
+      86/      5B : 72                  	MOV M, D
+      87/      5C : 73                  	MOV M, E
+      88/      5D :                     
+      89/      5D : 36 12               	MVI M, 12H
+      90/      5F : 7E                  	MOV A, M
+      91/      60 : 36 23               	MVI M, 23H
+      92/      62 : 46                  	MOV B, M
+      93/      63 : 36 34               	MVI M, 34H
+      94/      65 : 4E                  	MOV C, M
+      95/      66 : 36 45               	MVI M, 45H
+      96/      68 : 56                  	MOV D, M
+      97/      69 : 36 56               	MVI M, 56H
+      98/      6B : 5E                  	MOV E, M
+      99/      6C :                     	
+     100/      6C : 76                  	HLT
+     101/      6D :                     
+     102/      6D :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test2.asm - Page 3 - 2023/03/20 18:35:13
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/20" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - | *START :                          0 C |
+*TIME :                  "18:35:13" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     23 symbols
+     23 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test2.asm - Page 4 - 2023/03/20 18:35:13
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+    104 lines source file
+      1 pass
+      0 errors
+      0 warnings

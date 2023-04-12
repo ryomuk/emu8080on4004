@@ -1,0 +1,118 @@
+ AS V1.42 Beta [Bld 236] - Source File test3.asm - Page 1 - 2023/03/19 13:55:24
+
+
+       1/       0 :                     ;;; test3.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; ADI, ACI, SUI, SBI, ANI, XRI, ORI, CPI
+       4/       0 :                     ;;; ADD, ADC, SUB, SBB, ANA, XRA, ORA, CMP
+       5/       0 :                     
+       6/       0 :                     	CPU	8080
+       7/       0 :                     START:
+       8/       0 :                     ;;; ----------------------------------
+       9/       0 : 3E 11               	MVI A, 11H
+      10/       2 : C6 22               	ADI 22H			;A=33H
+      11/       4 :                     
+      12/       4 : 3E F0               	MVI A, 0F0H
+      13/       6 : C6 11               	ADI 11H			;A=01H
+      14/       8 :                     
+      15/       8 : 37                  	STC			;CY=1
+      16/       9 : 3E F0               	MVI A, 0F0H
+      17/       B : C6 0F               	ADI 0FH			;A=FF,CY=0
+      18/       D :                     
+      19/       D : AF                  	XRA A			;A=00,CY=0
+      20/       E : 3E F0               	MVI A, 0F0H		;
+      21/      10 : C6 0F               	ADI 0FH			;A=FF
+      22/      12 :                     ;;; ----------------------------------
+      23/      12 : 3E 11               	MVI A, 11H
+      24/      14 : CE 22               	ACI 22H			;A=33H
+      25/      16 :                     
+      26/      16 : 3E F0               	MVI A, 0F0H
+      27/      18 : CE 11               	ACI 11H			;A=01H
+      28/      1A :                     
+      29/      1A : 37                  	STC			;CY=1
+      30/      1B : 3E F0               	MVI A, 0F0H
+      31/      1D : CE 0F               	ACI 0FH			;A=00
+      32/      1F :                     
+      33/      1F : AF                  	XRA A			;CY=0
+      34/      20 : 3E F0               	MVI A, 0F0H
+      35/      22 : CE 0F               	ACI 0FH			;A=FF
+      36/      24 :                     ;;; ----------------------------------
+      37/      24 : 3E 33               	MVI A, 33H
+      38/      26 : D6 11               	SUI 11H			;A=22H
+      39/      28 :                     
+      40/      28 : 3E 10               	MVI A, 10H
+      41/      2A : D6 11               	SUI 11H			;A=FFH,CY=1
+      42/      2C :                     
+      43/      2C : 37                  	STC
+      44/      2D : 3E 10               	MVI A, 10H
+      45/      2F : D6 10               	SUI 10H			;A=00,CY=0
+      46/      31 :                     
+      47/      31 : AF                  	XRA A
+      48/      32 : 3E 10               	MVI A, 10H
+      49/      34 : D6 10               	SUI 10H			;A=00,CY=0
+      50/      36 :                     ;;; ----------------------------------
+      51/      36 : 3E 33               	MVI A, 33H
+      52/      38 : DE 11               	SBI 11H			;A=22
+      53/      3A :                     
+      54/      3A : 3E 10               	MVI A, 10H
+      55/      3C : DE 11               	SBI 11H			;A=FF,CY=1
+      56/      3E :                     
+      57/      3E : 37                  	STC
+      58/      3F : 3E 10               	MVI A, 10H
+      59/      41 : DE 10               	SBI 10H			;A=FF,CY=1
+      60/      43 :                     
+ AS V1.42 Beta [Bld 236] - Source File test3.asm - Page 2 - 2023/03/19 13:55:24
+
+
+      61/      43 : AF                  	XRA A
+      62/      44 : 3E 10               	MVI A, 10H
+      63/      46 : D6 10               	SUI 10H			;A=0,CY=0
+      64/      48 :                     ;;; ----------------------------------
+      65/      48 : 21 BC 0A            	LXI H, 0ABCH
+      66/      4B : 36 12               	MVI M, 12H
+      67/      4D : 23                  	INX H
+      68/      4E : 36 34               	MVI M, 34H
+      69/      50 :                     
+      70/      50 : 7E                  	MOV A, M		;A=34
+      71/      51 :                     	
+      72/      51 : 76                  	HLT
+      73/      52 :                     
+      74/      52 :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test3.asm - Page 3 - 2023/03/19 13:55:24
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/03/19" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - | *START :                          0 C |
+*TIME :                  "13:55:24" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     23 symbols
+     23 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test3.asm - Page 4 - 2023/03/19 13:55:24
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.00 seconds assembly time
+
+     76 lines source file
+      1 pass
+      0 errors
+      0 warnings

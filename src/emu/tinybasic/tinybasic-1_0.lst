@@ -1,4 +1,4 @@
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 1 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 1 - 2023/04/12 11:57:17
 
 
        1/       0 :                     ;*************************************************************
@@ -14,7 +14,7 @@
       11/       0 :                     ;
       12/       0 :                     ; modified for emu8080on4004
       13/       0 :                     ; by Ryo Mukai
-      14/       0 :                     ; 21 March 2023
+      14/       0 :                     ; 12 April 2023
       15/       0 :                     ; This source can be assembled with the Macroassembler AS
       16/       0 :                     ; (http://john.ccac.rwth-aachen.de:8000/as/)
       17/       0 :                     ;
@@ -54,14 +54,14 @@
       51/       0 :                     ;
       52/       0 :                             ORG  0000H
       53/       0 : F3                  START:  DI                              ;*** START/RESTART ***
-      54/       1 : 31 D0 0F                    LXI  SP,STACK                   ;INITIALIZE THE STACK
+      54/       1 : 31 00 20                    LXI  SP,STACK                   ;INITIALIZE THE STACK
       55/       4 : C3 BA 00                    JMP  ST1                        ;GO TO THE MAIN SECTION
       56/       7 : 4C                          DB   'L'
       57/       8 :                     ;
       58/       8 : E3                          XTHL                            ;*** TSTC OR RST 1 ***
       59/       9 : EF                          RST  5                          ;IGNORE BLANKS AND
       60/       A : BE                          CMP  M                          ;TEST CHARACTER
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 2 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 2 - 2023/04/12 11:57:17
 
 
       61/       B : C3 68 00                    JMP  TC1                        ;REST OF THIS IS AT TC1
@@ -110,7 +110,7 @@
      104/      49 : CD 37 05                    CALL SIZE                       ;FIND SIZE OF FREE
      105/      4C : E7                          RST  4                          ;AND CHECK THAT
      106/      4D : DA CA 05                    JC   ASORRY                     ;IF SO, SAY "SORRY"
-     107/      50 : 21 00 0F                    LXI  H,VARBGN                   ;IF NOT GET ADDRESS
+     107/      50 : 21 00 1F                    LXI  H,VARBGN                   ;IF NOT GET ADDRESS
      108/      53 : CD 5A 05                    CALL SUBDE                      ;OF @(EXPR) AND PUT IT
      109/      56 : D1                          POP  D                          ;IN HL
      110/      57 : C9                          RET                             ;C FLAG IS CLEARED
@@ -118,13 +118,13 @@
      112/      5A : 3F                          CMC                             ;IF NOT RETURN C FLAG
      113/      5B : D8                          RC
      114/      5C : 13                          INX  D                          ;IF A THROUGH Z
-     115/      5D : 21 00 0F                    LXI  H,VARBGN                   ;COMPUTE ADDRESS OF
+     115/      5D : 21 00 1F                    LXI  H,VARBGN                   ;COMPUTE ADDRESS OF
      116/      60 : 07                          RLC                             ;THAT VARIABLE
      117/      61 : 85                          ADD  L                          ;AND RETURN IT IN HL
      118/      62 : 6F                          MOV  L,A                        ;WITH C FLAG CLEARED
      119/      63 : 3E 00                       MVI  A,0
      120/      65 : 8C                          ADC  H
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 3 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 3 - 2023/04/12 11:57:17
 
 
      121/      66 : 67                          MOV  H,A
@@ -187,7 +187,7 @@
      178/      BA :                     ;*
      179/      BA :                     ;* *** MAIN ***
      180/      BA :                     ;*
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 4 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 4 - 2023/04/12 11:57:17
 
 
      181/      BA :                     ;* THIS IS THE MAIN LOOP THAT COLLECTS THE TINY BASIC PROGRAM
@@ -231,7 +231,7 @@
      219/      D3 : 3E 3E               ST3:    MVI  A,'>'                      ;PROMPT '>' AND
      220/      D5 : CD D0 05                    CALL GETLN                      ;READ A LINE
      221/      D8 : D5                          PUSH D                          ;DE->END OF LINE
-     222/      D9 : 11 37 0F                    LXI  D,BUFFER                   ;DE->BEGINNING OF LINE
+     222/      D9 : 11 37 1F                    LXI  D,BUFFER                   ;DE->BEGINNING OF LINE
      223/      DC : CD 77 00                    CALL TSTNUM                     ;TEST IF IT IS A NUMBER
      224/      DF : EF                          RST  5
      225/      E0 : 7C                          MOV  A,H                        ;HL=VALUE OF THE # OR
@@ -250,7 +250,7 @@
      238/      EF : 93                          SUB  E
      239/      F0 : F5                          PUSH PSW                        ;A=# OF BYTES IN LINE
      240/      F1 : CD 0E 06                    CALL FNDLN                      ;FIND THIS LINE IN SAVE
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 5 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 5 - 2023/04/12 11:57:17
 
 
      241/      F4 : D5                          PUSH D                          ;AREA, DE->SAVE AREA
@@ -275,7 +275,7 @@
      260/     115 : 3E 00                       MVI  A,0
      261/     117 : 8C                          ADC  H
      262/     118 : 67                          MOV  H,A                        ;HL->NEW UNFILLED AREA
-     263/     119 : 11 00 0F                    LXI  D,TXTEND                   ;CHECK TO SEE IF THERE
+     263/     119 : 11 00 1F                    LXI  D,TXTEND                   ;CHECK TO SEE IF THERE
      264/     11C : E7                          RST  4                          ;IS ENOUGH SPACE
      265/     11D : D2 C9 05                    JNC  QSORRY                     ;SORRY, NO ROOM FOR IT
      266/     120 : 22 13 08                    SHLD TXTUNF                     ;OK, UPDATE TXTUNF
@@ -313,7 +313,7 @@
      298/     12F :                     ;* MATCH THIS NULL ITEM AS DEFAULT.
      299/     12F :                     ;*
      300/     12F : =12FH                TAB1    EQU  $                          ;DIRECT COMMANDS
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 6 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 6 - 2023/04/12 11:57:17
 
 
      301/     12F : 4C 49 53 54                 DB   'LIST'
@@ -376,7 +376,7 @@
      330/     181 : (MACRO)                      ITEM DEFLT
      330/     181 : 83                          DB   (DEFLT >> 8) | 80H
      330/     182 : FB                          DB   DEFLT & 0FFH
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 7 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 7 - 2023/04/12 11:57:17
 
 
      331/     183 : 59 4F 55 20 4D 41           DB   'YOU MAY INSERT  MORE COMMANDS.'
@@ -439,7 +439,7 @@
      357/     1EA : 84                          DB   (XP15 >> 8) | 80H
      357/     1EB : 2C                          DB   XP15 & 0FFH
      358/     1EC : 3C 3D                       DB   '<='
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 8 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 8 - 2023/04/12 11:57:17
 
 
      359/     1EE : (MACRO)                      ITEM XP14
@@ -502,7 +502,7 @@
      410/     226 :                     ;* FOR 'RETURN' AND 'NEXT': GO BACK TO SAVED RETURN LINE.
      411/     226 :                     ;* FOR ALL OTHERS: IF 'CURRENT' -> 0, GO TO 'START', ELSE
      412/     226 :                     ;* GO EXECUTE NEXT COMMAND.  (THIS IS DONE IN 'FINISH'.)
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 9 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 9 - 2023/04/12 11:57:17
 
 
      413/     226 :                     ;*************************************************************
@@ -565,7 +565,7 @@
      470/     25E :                     ;*
      471/     25E :                     ;* LIST HAS TWO FORMS:
      472/     25E :                     ;* 'LIST(CR)' LISTS ALL SAVED LINES
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 10 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 10 - 2023/04/12 11:57:17
 
 
      473/     25E :                     ;* 'LIST #(CR)' START LIST AT THIS LINE #
@@ -628,7 +628,7 @@
      530/     2A1 : F7                          RST  6
      531/     2A2 : DF                  PR8:    RST  3                          ;EVALUATE THE EXPR
      532/     2A3 : C5                          PUSH B
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 11 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 11 - 2023/04/12 11:57:17
 
 
      533/     2A4 : CD 68 06                    CALL PRTNUM                     ;PRINT THE VALUE
@@ -691,7 +691,7 @@
      590/     2E4 :                     ;* THE SECOND FORM MEANS THE SAME THING AS THE FIRST FORM WITH
      591/     2E4 :                     ;* EXP1=1.  (I.E., WITH A STEP OF +1.)
      592/     2E4 :                     ;* TBI WILL FIND THE VARIABLE VAR, AND SET ITS VALUE TO THE
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 12 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 12 - 2023/04/12 11:57:17
 
 
      593/     2E4 :                     ;* CURRENT VALUE OF EXP1.  IT ALSO EVALUATES EXPR2 AND EXP1
@@ -754,7 +754,7 @@
      650/     32B : BB                          CMP  E
      651/     32C : C2 1D 03                    JNZ  FR7
      652/     32F : EB                          XCHG                            ;YES, FOUND ONE
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 13 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 13 - 2023/04/12 11:57:17
 
 
      653/     330 : 21 00 00                    LXI  H,0
@@ -817,7 +817,7 @@
      710/     390 :                     ;*
      711/     390 :                     ;* 'REM' CAN BE FOLLOWED BY ANYTHING AND IS IGNORED BY TBI.
      712/     390 :                     ;* TBI TREATS IT LIKE AN 'IF' WITH A FALSE CONDITION.
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 14 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 14 - 2023/04/12 11:57:17
 
 
      713/     390 :                     ;*
@@ -880,7 +880,7 @@
      770/     3BB : DA 9E 05                    JC   QWHAT                      ;"WHAT?" IT IS NOT?
      771/     3BE : 1A                          LDAX D                          ;GET READY FOR 'PRTSTR'
      772/     3BF : 4F                          MOV  C,A
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 15 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 15 - 2023/04/12 11:57:17
 
 
      773/     3C0 : 97                          SUB  A
@@ -902,7 +902,7 @@
      789/     3DC : D5                          PUSH D                          ;OLD HL
      790/     3DD : 3E 3A                       MVI  A,':'                      ;PRINT THIS TOO
      791/     3DF : CD D0 05                    CALL GETLN                      ;AND GET A LINE
-     792/     3E2 : 11 37 0F                    LXI  D,BUFFER                   ;POINTS TO BUFFER
+     792/     3E2 : 11 37 1F                    LXI  D,BUFFER                   ;POINTS TO BUFFER
      793/     3E5 : DF                          RST  3                          ;EVALUATE INPUT
      794/     3E6 : 00                          NOP                             ;CAN BE 'CALL ENDCHK'
      795/     3E7 : 00                          NOP
@@ -943,7 +943,7 @@
      830/     40B :                     ;* WHERE <REL.OP.> IS ONE OF THE OPERATORS IN TAB8 AND THE
      831/     40B :                     ;* RESULT OF THESE OPERATIONS IS 1 IF TRUE AND 0 IF FALSE.
      832/     40B :                     ;* <EXPR2>::=(+ OR -)<EXPR3>(+ OR -<EXPR3>)(....)
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 16 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 16 - 2023/04/12 11:57:17
 
 
      833/     40B :                     ;* WHERE () ARE OPTIONAL AND (....) ARE OPTIONAL REPEATS.
@@ -1006,7 +1006,7 @@
      890/     44F : CF                  EXPR2:  RST  1                          ;NEGATIVE SIGN?
      891/     450 : 2D                          DB   '-'
      892/     451 : 06                          DB   XP21-$-1
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 17 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 17 - 2023/04/12 11:57:17
 
 
      893/     452 : 21 00 00                    LXI  H,0                        ;YES, FAKE '0-'
@@ -1069,7 +1069,7 @@
      950/     4B5 : CF                  XP34:   RST  1                          ;DIVIDE?
      951/     4B6 : 2F                          DB   '/'
      952/     4B7 : 44                          DB   XP42-$-1
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 18 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 18 - 2023/04/12 11:57:17
 
 
      953/     4B8 : E5                          PUSH H                          ;YES, SAVE 1ST <EXPR4>
@@ -1132,7 +1132,7 @@
     1010/     514 : E7                          RST  4
     1011/     515 : DA 1B 05                    JC   RA1                        ;WRAP AROUND IF LAST
     1012/     518 : 21 00 00                    LXI  H,START
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 19 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 19 - 2023/04/12 11:57:17
 
 
     1013/     51B : 5E                  RA1:    MOV  E,M
@@ -1158,7 +1158,7 @@
     1033/     537 : 2A 13 08            SIZE:   LHLD TXTUNF                     ;*** SIZE ***
     1034/     53A : D5                          PUSH D                          ;GET THE NUMBER OF FREE
     1035/     53B : EB                          XCHG                            ;BYTES BETWEEN 'TXTUNF'
-    1036/     53C : 21 00 0F                    LXI  H,VARBGN                   ;AND 'VARBGN'
+    1036/     53C : 21 00 1F                    LXI  H,VARBGN                   ;AND 'VARBGN'
     1037/     53F : CD 5A 05                    CALL SUBDE
     1038/     542 : D1                          POP  D
     1039/     543 : C9                          RET
@@ -1195,7 +1195,7 @@
     1070/     558 : 19                          DAD  D
     1071/     559 : C9                          RET
     1072/     55A :                     ;
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 20 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 20 - 2023/04/12 11:57:17
 
 
     1073/     55A : 7D                  SUBDE:  MOV  A,L                        ;*** SUBDE ***
@@ -1258,7 +1258,7 @@
     1130/     578 :                     ;* 'QWHAT' SAVES TEXT POINTER IN STACK AND GET MESSAGE "WHAT?"
     1131/     578 :                     ;* 'AWHAT' JUST GET MESSAGE "WHAT?" AND JUMP TO 'ERROR'.
     1132/     578 :                     ;* 'QSORRY' AND 'ASORRY' DO SAME KIND OF THING.
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 21 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 21 - 2023/04/12 11:57:17
 
 
     1133/     578 :                     ;* 'QHOW' AND 'AHOW' IN THE ZERO PAGE SECTION ALSO DO THIS.
@@ -1321,7 +1321,7 @@
     1190/     5C1 : 3E 3F                       MVI  A,'?'                      ;PRINT A "?"
     1191/     5C3 : D7                          RST  2
     1192/     5C4 : 97                          SUB  A                          ;AND THE REST OF THE
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 22 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 22 - 2023/04/12 11:57:17
 
 
     1193/     5C5 : CD 36 06                    CALL PRTSTG                     ;LINE
@@ -1359,7 +1359,7 @@
     1225/     5D0 :                     ;* 'FNDSKP' USE DE TO FIND A CR, AND THEN START SEARCH.
     1226/     5D0 :                     ;*
     1227/     5D0 : D7                  GETLN:  RST  2                          ;*** GETLN ***
-    1228/     5D1 : 11 37 0F                    LXI  D,BUFFER                   ;PROMPT AND INIT.
+    1228/     5D1 : 11 37 1F                    LXI  D,BUFFER                   ;PROMPT AND INIT.
     1229/     5D4 : CD 2C 07            GL1:    CALL CHKIO                      ;CHECK KEYBOARD
     1230/     5D7 : CA D4 05                    JZ   GL1                        ;NO INPUT, WAIT
     1231/     5DA : D7                          RST  2                          ;INPUT, ECHO BACK
@@ -1384,7 +1384,7 @@
     1250/     5FC : CA 06 06                    JZ   GL4                        ;NO, REDO WHOLE LINE
     1251/     5FF : 1B                          DCX  D                          ;YES, BACKUP POINTER
     1252/     600 : 3E 5C                       MVI  A,BKS                      ;AND ECHO A BACK-SLASH
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 23 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 23 - 2023/04/12 11:57:17
 
 
     1253/     602 : D7                          RST  2
@@ -1447,7 +1447,7 @@
     1310/     636 :                     ;* HOWEVER, IF THE NUMBER OF DIGITS IS LARGER THAN THE # IN
     1311/     636 :                     ;* C, ALL DIGITS ARE PRINTED ANYWAY.  NEGATIVE SIGN IS ALSO
     1312/     636 :                     ;* PRINTED AND COUNTED IN, POSITIVE SIGN IS NOT.
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 24 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 24 - 2023/04/12 11:57:17
 
 
     1313/     636 :                     ;*
@@ -1510,7 +1510,7 @@
     1370/     684 : 60                          MOV  H,B                        ;MOVE RESULT TO BC
     1371/     685 : 69                          MOV  L,C
     1372/     686 : C3 79 06                    JMP  PN2                        ;AND DIVIDE BY 10
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 25 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 25 - 2023/04/12 11:57:17
 
 
     1373/     689 : C1                  PN3:    POP  B                          ;WE GOT ALL DIGITS IN
@@ -1573,7 +1573,7 @@
     1430/     6C0 : 78                  MVDOWN: MOV  A,B                        ;*** MVDOWN ***
     1431/     6C1 : 92                          SUB  D                          ;TEST IF DE = BC
     1432/     6C2 : C2 C8 06                    JNZ  MD1                        ;NO, GO MOVE
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 26 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 26 - 2023/04/12 11:57:17
 
 
     1433/     6C5 : 79                          MOV  A,C                        ;MAYBE, OTHER BYTE?
@@ -1602,7 +1602,7 @@
     1456/     6E9 : C5                  PP1:    PUSH B                          ;BC = RETURN ADDR.
     1457/     6EA : C9                          RET
     1458/     6EB :                     ;
-    1459/     6EB : 21 A7 0F            PUSHA:  LXI  H,STKLMT                   ;*** PUSHA ***
+    1459/     6EB : 21 A7 1F            PUSHA:  LXI  H,STKLMT                   ;*** PUSHA ***
     1460/     6EE : CD 64 05                    CALL CHGSGN
     1461/     6F1 : C1                          POP  B                          ;BC=RETURN ADDRESS
     1462/     6F2 : 39                          DAD  SP                         ;IS STACK NEAR THE TOP?
@@ -1636,7 +1636,7 @@
     1490/     714 :                     ;* ARE RESTORED.
     1491/     714 :                     ;*
     1492/     714 :                     ;* 'CHKIO' CHECKS THE INPUT.  IF NO INPUT, IT WILL RETURN TO
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 27 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 27 - 2023/04/12 11:57:17
 
 
     1493/     714 :                     ;* THE CALLER WITH THE Z FLAG SET.  IF THERE IS INPUT, Z FLAG
@@ -1699,7 +1699,7 @@
               7A2 : 53 20 41 4E 44 20 
               7A8 : 46 55 4E 43 54 49 
               7AE : 4F 4E 53 2E       
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 28 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 28 - 2023/04/12 11:57:17
 
 
     1537/     7B2 : 53 4B 59 20 28 53           DB   'SKY (SPACE) IS THE LIMIT.'
@@ -1731,21 +1731,19 @@
     1553/     811 : 00 00               RANPNT: DW   START                      ;RANDOM NUMBER POINTER
     1554/     813 : 15 08               TXTUNF: DW   TXTBGN                     ;->UNFILLED TEXT AREA
     1555/     815 :                     TXTBGN: DS   1                          ;TEXT SAVE AREA BEGINS
-    1556/     816 :                     ;;;     ORG  1F00H			;for emu8080on4004
-    1557/     F00 :                             ORG  0F00H
-    1558/     F00 : =0F00H               TXTEND  EQU  $                          ;TEXT SAVE AREA ENDS
-    1559/     F00 :                     VARBGN: DS   2*27                       ;VARIABLE @(0)
-    1560/     F36 :                             DS   1                          ;EXTRA BYTE FOR BUFFER
-    1561/     F37 :                     BUFFER: DS   72                         ;INPUT BUFFER
-    1562/     F7F : =0F7FH               BUFEND  EQU  $                          ;BUFFER ENDS
-    1563/     F7F :                             DS   40                         ;EXTRA BYTES FOR STACK
-    1564/     FA7 : =0FA7H               STKLMT  EQU  $                          ;TOP LIMIT FOR STACK
-    1565/     FA7 :                     ;;;     ORG  2000H
-    1566/     FD0 :                     	ORG  0FD0H			;for emu8080on4004
-    1567/     FD0 : =0FD0H               STACK   EQU  $                          ;STACK STARTS HERE
-    1568/     FD0 :                     
-    1569/     FD0 :                             END
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 29 - 2023/03/21 10:47:03
+    1556/    1F00 :                     	ORG  1F00H
+    1557/    1F00 : =1F00H               TXTEND  EQU  $                          ;TEXT SAVE AREA ENDS
+    1558/    1F00 :                     VARBGN: DS   2*27                       ;VARIABLE @(0)
+    1559/    1F36 :                             DS   1                          ;EXTRA BYTE FOR BUFFER
+    1560/    1F37 :                     BUFFER: DS   72                         ;INPUT BUFFER
+    1561/    1F7F : =1F7FH               BUFEND  EQU  $                          ;BUFFER ENDS
+    1562/    1F7F :                             DS   40                         ;EXTRA BYTES FOR STACK
+    1563/    1FA7 : =1FA7H               STKLMT  EQU  $                          ;TOP LIMIT FOR STACK
+    1564/    2000 :                     	ORG  2000H
+    1565/    2000 : =2000H               STACK   EQU  $                          ;STACK STARTS HERE
+    1566/    2000 :                     
+    1567/    2000 :                             END
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 29 - 2023/04/12 11:57:17
 
 
   Symbol Table (* = unused):
@@ -1755,7 +1753,7 @@
 *ARCHITECTURE :                                      "x86_64-unknown-linux" - |
  ASORRY :                       5CA C |  AWHAT :                        59F C |
  BKA :                           5F - |  BKS :                           5C - |
- BUFEND :                      0F7F - |  BUFFER :                      0F37 C |
+ BUFEND :                      1F7F - |  BUFFER :                      1F37 C |
 *CASESENSITIVE :                  0 - |  CHGSGN :                       564 C |
  CHKIO :                        72C C |  CHKSGN :                       561 C |
  CI1 :                          745 C |  CK1 :                          576 C |
@@ -1763,7 +1761,7 @@
  CNTLO :                         0F - |  CNTLU :                         15 - |
 *COMPMODE :                       0 - | *CONSTPI :        3.141592653589793 - |
  CR :                            0D - |  CRLF :                          0E C |
- CURRNT :                       801 C | *DATE :                "2023/03/21" - |
+ CURRNT :                       801 C | *DATE :                "2023/04/12" - |
  DEFLT :                        3FB C |  DEL :                           7F - |
  DIRECT :                       1F5 C |  DIVIDE :                       544 C |
 *DLLN :                          7D - |  DV1 :                          54F C |
@@ -1808,7 +1806,7 @@
  NX3 :                          362 C |  OC2 :                          714 C |
  OC3 :                          719 C |  OCSW :                         800 C |
  OK :                           0AB C | *PADDING :                        1 - |
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 30 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 30 - 2023/04/12 11:57:17
 
 
  PARN :                         4F5 C |  PN1 :                          678 C |
@@ -1836,19 +1834,19 @@
  SORRY :                        0B4 C |  SS1 :                           28 C |
  ST1 :                          0BA C |  ST2 :                          0CA C |
  ST3 :                          0D3 C |  ST4 :                          108 C |
- STACK :                       0FD0 - |  START :                          0 C |
+ STACK :                       2000 - |  START :                          0 C |
  STKGOS :                       803 C |  STKINP :                       805 C |
- STKLMT :                      0FA7 - |  STOP :                         22F C |
+ STKLMT :                      1FA7 - |  STOP :                         22F C |
  SUBDE :                        55A C |  SV1 :                          588 C |
  TAB1 :                         12F - |  TAB2 :                         13F - |
  TAB4 :                         1A1 - |  TAB5 :                         1D1 - |
  TAB6 :                         1D7 - |  TAB8 :                         1DF - |
  TC1 :                           68 C |  TC2 :                           73 C |
-*TIME :                  "10:47:03" - |  TN1 :                           7C C |
+*TIME :                  "11:57:17" - |  TN1 :                           7C C |
 *TRUE :                           1 - |  TSTNUM :                        77 C |
  TV1 :                           58 C |  TXTBGN :                       815 C |
- TXTEND :                      0F00 - |  TXTUNF :                       813 C |
- UPA :                           5E - |  VARBGN :                      0F00 C |
+ TXTEND :                      1F00 - |  TXTUNF :                       813 C |
+ UPA :                           5E - |  VARBGN :                      1F00 C |
  VARNXT :                       805 - | *VERSION :                     142F - |
  WHAT :                         0AE C |  XP11 :                         411 C |
  XP12 :                         417 C |  XP13 :                         41D C |
@@ -1867,7 +1865,7 @@
     216 symbols
      24 unused symbols
 
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 31 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 31 - 2023/04/12 11:57:17
 
 
   Defined Macros:
@@ -1877,7 +1875,7 @@ ITEM                                  |
 
       1 macro
 
- AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 32 - 2023/03/21 10:47:03
+ AS V1.42 Beta [Bld 236] - Source File tinybasic-1_0.asm - Page 32 - 2023/04/12 11:57:17
 
 
   Code Pages:
@@ -1889,8 +1887,8 @@ STANDARD (0 changed characters)
 
 0.01 seconds assembly time
 
-   1570 lines source file
-   1630 lines incl. macro expansions
+   1568 lines source file
+   1628 lines incl. macro expansions
       2 passes
       0 errors
       0 warnings

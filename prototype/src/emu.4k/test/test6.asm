@@ -1,0 +1,92 @@
+;;; test6.asm
+;;; 
+;;; 0CH to 3FH
+
+	CPU	8080
+START:
+	MVI C, 00H
+	INR C
+	DCR C
+	DCR C
+	MVI C, 80H
+	INR C
+	DCR C
+	DCR C
+
+	LXI D, 0123H
+	MVI A, 12H
+	STAX D
+	INX D
+	INR D
+	DCR D
+
+	LXI H, 1111H
+	DAD D
+
+	MVI A, 00H
+	LDAX D
+	
+	DCX D
+	INR E
+	DCR E
+
+	LXI H, 1234H
+	SHLD 0100H
+
+	HLT
+	
+	LXI SP, 0100H
+	INX H
+	MVI M, 30
+	MOV A, M
+	INR H
+	MVI M, 12
+	MOV A, M
+
+	DCR H
+
+	DAD H
+
+	LHLD 0100H
+	LXI H, 0100H
+	DCX H
+	INR L
+	DCR L
+
+	MVI A, 55H
+	CMA
+
+	LXI SP, 300H
+	MVI A, 34
+	STA 0100H
+	INX SP
+
+	LXI H, 200H
+	MVI M, 23H
+	MOV M, A
+	INR M
+	MOV M, A
+	MOV A, M
+
+	LXI H, 111H
+	LXI SP, 222H
+	DAD SP
+	DCX SP
+	
+	MVI A, 0ABH
+
+	LDA 200H
+
+	HLT
+
+	LXI H, 300H
+	MOV B, M
+	DCX SP
+	
+	INR A
+	DCR A
+
+
+	HLT
+
+	END
