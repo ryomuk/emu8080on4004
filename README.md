@@ -36,8 +36,8 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
       (上記を論理メモリ 0000H〜FDFFHにマッピングしてアクセス)
 
 ## ToDO
-- メモリ64KBに拡張
-- プリント基板作成(基板発注済(2023/4/8)．ガーバーファイル等は近日公開予定)
+- メモリ64KBに拡張 → Rev.2.1で実現(2023/4/12)
+- プリント基板作成 → Rev.2.1で実現(2023/4/12)
 
 ## 動画
 Youtubeで関連動画を公開しています．
@@ -47,7 +47,6 @@ Youtubeで関連動画を公開しています．
 関連する情報が書いてあるかも．
 - [Intel 4004 関連記事の目次@ブログの練習](https://blog.goo.ne.jp/tk-80/e/3fa1e2972737c7b7d1b83f4e7bd648a2)
 
-
 ### 4004関連開発事例
 - [Intel 4004  50th Anniversary Project](https://www.4004.com/)
   - https://www.4004.com/busicom-replica.html
@@ -55,7 +54,6 @@ Youtubeで関連動画を公開しています．
 - https://github.com/jim11662418/4004-SBC
 - https://www.cpushack.com/mcs-4-test-boards-for-sale
 - https://github.com/novi/4004MainBoard
-
 
 ### データシート
 - http://www.bitsavers.org/components/intel/
@@ -67,7 +65,7 @@ Youtubeで関連動画を公開しています．
 ## 更新履歴
 - 2023/3/21: 初版公開
 - 2023/4/3: SUBフラグ(NEC uPD8080A, uCOM-80用)に関するコードを削除
-- 2023/4/12: 基板(Rev.2.1)作成
+- 2023/4/12: 基板(Rev.2.1)に合わせていろいろ更新．ブレッドボード版はprototypeフォルダに移動
 
 ## 画像集
 - ブレッドボード版のプロトタイプ
