@@ -31,6 +31,8 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
 
 ### Rev.2.1版の仕様(ブレッドボード版との差分)
 - Program Memory
+  - DATA RAM: ピンヘッダの設定により4002-1 x 4の構成も可能ですが，その場合はソフトウェアでRAM2, RAM3をアクセスしている部分を修正する必要があります．
+  - ROM: AT28C64B, AT28C256, 2764, 27256をDIPスイッチで選択可能なように設計しましたが，動作確認はAT28C64Bで実施．それ以外は未確認です．
   - RAM: HM624256(1Mbit(256k x 4bit) SRAM)x 2個
     - 物理メモリ F00H〜FFDHの254byte x 256バンク
       (上記を論理メモリ 0000H〜FDFFHにマッピングしてアクセス)
