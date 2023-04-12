@@ -47,7 +47,7 @@ Youtubeで関連動画を公開しています．
 関連する情報が書いてあるかも．
 - [Intel 4004 関連記事の目次@ブログの練習](https://blog.goo.ne.jp/tk-80/e/3fa1e2972737c7b7d1b83f4e7bd648a2)
 
-### 4004関連開発事例
+## 4004関連開発事例
 - [Intel 4004  50th Anniversary Project](https://www.4004.com/)
   - https://www.4004.com/busicom-replica.html
   - http://www.4004.com/2009/Busicom-141PF-Calculator_asm_rel-1-0-1.txt
@@ -55,11 +55,11 @@ Youtubeで関連動画を公開しています．
 - https://www.cpushack.com/mcs-4-test-boards-for-sale
 - https://github.com/novi/4004MainBoard
 
-### データシート
+## データシート
 - http://www.bitsavers.org/components/intel/
 - https://www.intel-vintage.info/intelmcs.htm
 
-### 開発環境
+## 開発環境
 - [The Macroassembler AS](http://john.ccac.rwth-aachen.de:8000/as/)
 
 ## 更新履歴
