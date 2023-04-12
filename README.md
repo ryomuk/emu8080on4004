@@ -40,6 +40,7 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
 ## ToDO
 - メモリ64KBに拡張 → Rev.2.1で実現(2023/4/12)
 - プリント基板作成 → Rev.2.1で実現(2023/4/12)
+- IN命令時にTESTキーを使ったSTOPボタン相当の機能の実装
 
 ## 動画
 Youtubeで関連動画を公開しています．
