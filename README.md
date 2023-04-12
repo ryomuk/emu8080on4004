@@ -17,7 +17,7 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
 - OUT命令はAレジスタを4004ボードのシリアルポートに出力します．
 
 ## 実験ボードの仕様
-### ブレッドボード版プロトタイプ
+### ブレッドボード版プロトタイプの仕様
 - CPU: Intel 4004
 - Clock: 740kHz
 - DATA RAM: 4002-1 x 2 + 4002-2 x 2 (計320bit x 4)
@@ -29,7 +29,7 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
       (上記を論理メモリ 000H〜FDFHにマッピングしてアクセス)
 - 通信ポート: 9600bps Software Serial UART (TTL level)
 
-### Rev.2.1版(ブレッドボード版との差分)
+### Rev.2.1版の仕様(ブレッドボード版との差分)
 - Program Memory
   - RAM: HM6242566(1Mbit(256k x 4bit) SRAM)x 2個
     - 物理メモリ F00H〜FFDHの254byte x 256バンク
