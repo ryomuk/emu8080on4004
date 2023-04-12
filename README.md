@@ -31,7 +31,7 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
 
 ### Rev.2.1版の仕様(ブレッドボード版との差分)
 - Program Memory
-  - RAM: HM6242566(1Mbit(256k x 4bit) SRAM)x 2個
+  - RAM: HM624256(1Mbit(256k x 4bit) SRAM)x 2個
     - 物理メモリ F00H〜FFDHの254byte x 256バンク
       (上記を論理メモリ 0000H〜FDFFHにマッピングしてアクセス)
 
