@@ -1,4 +1,4 @@
-PRG=test10
+PRG=test11
 
 .SUFFIXES: .asm .p .bin .lst .hex
 

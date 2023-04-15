@@ -1,0 +1,85 @@
+ AS V1.42 Beta [Bld 236] - Source File test11.asm - Page 1 - 2023/04/15 10:40:36
+
+
+       1/       0 :                     ;;; test11.asm
+       2/       0 :                     ;;; 
+       3/       0 :                     ;;; P flag (JPE, JPO)
+       4/       0 :                     ;;; though it is not properly implemented
+       5/       0 :                     	
+       6/       0 :                     	CPU	8080
+       7/       0 :                     	
+       8/       0 :                     START:
+       9/       0 : AF                  	XRA A
+      10/       1 : 47                  	MOV B,A
+      11/       2 :                     L1:
+      12/       2 : 78                  	MOV A,B
+      13/       3 : EA 0B 00            	JPE L_JPE
+      14/       6 : 3E 4F               	MVI A,'O'
+      15/       8 : C3 0D 00            	JMP L_OUT
+      16/       B :                     L_JPE:	
+      17/       B : 3E 45               	MVI A,'E'
+      18/       D :                     L_OUT:
+      19/       D : D3 00               	OUT 0
+      20/       F :                     
+      21/       F : 04                  	INR B
+      22/      10 : 78                  	MOV A, B
+      23/      11 : E6 0F               	ANI 15
+      24/      13 : C2 1E 00            	JNZ L_NEXT
+      25/      16 : 3E 0D               	MVI A,'\r'
+      26/      18 : D3 00               	OUT 0
+      27/      1A : 3E 0A               	MVI A,'\n'
+      28/      1C : D3 00               	OUT 0
+      29/      1E :                     	
+      30/      1E :                     L_NEXT:	
+      31/      1E : AF                  	XRA A
+      32/      1F : B0                  	ORA B
+      33/      20 : C2 02 00            	JNZ L1
+      34/      23 :                     	
+      35/      23 : 3E 0D               	MVI A,'\r'
+      36/      25 : D3 00               	OUT 0
+      37/      27 : 3E 0A               	MVI A,'\n'
+      38/      29 : D3 00               	OUT 0
+      39/      2B :                     
+      40/      2B : 76                  	HLT
+      41/      2C :                     	
+      42/      2C :                     	END
+ AS V1.42 Beta [Bld 236] - Source File test11.asm - Page 2 - 2023/04/15 10:40:36
+
+
+  Symbol Table (* = unused):
+  --------------------------
+
+*ARCHITECTURE :                                      "x86_64-unknown-linux" - |
+*CASESENSITIVE :                  0 - | *COMPMODE :                       0 - |
+*CONSTPI :        3.141592653589793 - | *DATE :                "2023/04/15" - |
+*FALSE :                          0 - | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASFPU :                         0 - |
+*HASPMMU :                        0 - | *INSUPMODE :                      0 - |
+ L1 :                             2 C | *LISTON :                         1 - |
+ L_JPE :                         0B C |  L_NEXT :                        1E C |
+ L_OUT :                         0D C | *MACEXP :                         7 - |
+*MOMCPU :                      8080 - | *MOMCPUNAME :                "8080" - |
+*NESTMAX :                      100 - | *PADDING :                        1 - |
+*RELAXED :                        0 - | *START :                          0 C |
+*TIME :                  "10:40:36" - | *TRUE :                           1 - |
+*VERSION :                     142F - | *Z80SYNTAX :                      0 - |
+
+     27 symbols
+     23 unused symbols
+
+ AS V1.42 Beta [Bld 236] - Source File test11.asm - Page 3 - 2023/04/15 10:40:36
+
+
+  Code Pages:
+  ----------
+
+STANDARD (0 changed characters)
+
+1 code page
+
+0.01 seconds assembly time
+
+     43 lines source file
+      2 passes
+      0 errors
+      0 warnings

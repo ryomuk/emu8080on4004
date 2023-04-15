@@ -1,0 +1,31 @@
+	if EMU_USE_FLAG_P
+	;; Set P flag
+;;; table implementation may be faster
+;;;              0123456789ABCDEF
+;;; 4bit table =(1001011001101001)
+	org 09C0H
+PARITY4TABLE:  			; (1 when EVEN)
+	data 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1
+GETPARITY_R1:
+	FIN P2
+	LD P2_LO
+	XCH R1
+	BBL 0
+
+	FIM P0, lo(PARITY4TABLE)
+	LD P1_HI
+	XCH R1
+	JMS GETPARITY_R1
+	LD R1
+	XCH P1_HI
+	LD P1_LO
+	XCH R1	
+	JMS GETPARITY_R1
+	LD R1
+	ADD P1_HI
+	RAR       ; here CY=PARITY (1 when EVEN)
+	BBL 0	
+	endif
+
+;;;;
+

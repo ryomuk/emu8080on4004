@@ -3,7 +3,7 @@
 ;;; for Intel 4004 evaluation board
 ;;;
 ;;; by Ryo Mukai
-;;; 2023/04/09
+;;; 2023/04/14
 ;;;---------------------------------------------------------------------------
 
 ;;;---------------------------------------------------------------------------
@@ -19,22 +19,24 @@
 ;;; Software Configuration
 ;;;---------------------------------------------------------------------------
 
-;;; ENABLE_MEMTEST = 0
-ENABLE_MEMTEST = 1			; memory test command 'T'
+USE_MON_CMD_DP = 0		; dump physical memory command 'DP'
+USE_MON_CMD_T = 0		; memory test command 'T'
 
 ;;;---------------------------------------------------------------------------
 ;;; Emulator compile configuration
 ;;;---------------------------------------------------------------------------
 ;; FLAG_P is not implemented because it takes much cost
-EMU_USE_FLAG_P = 0	; don't use P FLAG
-;;; EMU_USE_FLAG_P = 1	; use P FLAG
+USE_EMU_FLAG_P = 1	; use P FLAG
 
 ;;;---------------------------------------------------------------------------
 ;;; Emulator port configuration
 ;;;---------------------------------------------------------------------------
-EMU_UARTRC	equ	00H	; for tinybasic-1.0
-EMU_UARTRD	equ	01H	; for tynybasic-1.0
-;;;	EMU_IN_UARTRC_VALUE	equ 22H	; for tynybasic-1.0
+;;; EMU_UARTRC	equ	00H	; for tinybasic-1.0
+;;; EMU_UARTRD	equ	01H	; for tynybasic-1.0
+;;; EMU_IN_UARTRC_VALUE	equ 22H	 ; for tynybasic-1.0
+
+EMU_UARTRC	equ	01H	; for SBC8080 compatibility
+EMU_UARTRD	equ	00H	; for SBC8080 compatibility
 EMU_IN_UARTRC_VALUE	equ 0FFH	;
 EMU_IN_STOPCODE	equ 03H			; ctrl-C
 	
@@ -142,7 +144,7 @@ REG4_FLAG_1P1C	equ REG8_FLAG
 REG4_FLAG_SZBH	equ REG8_FLAG+1
 
 REG8_EMU_KEYBUF equ 20H ; virtual buffer for input STOP key
-REG4_EMU_STEP	equ 24H	; Execution mode (0:continuous, 1:step)
+REG4_EMU_MODE	equ 24H	; Execution mode (0:continuous, 1:viewPC, 2:step)
 	
 REG16_MON_INDEX	equ 28H	;
 REG16_MON_ADDR	equ 2CH	;
@@ -278,22 +280,28 @@ L6:
 	JCN ZN, L7		;
 
 	JMS LD_P1_PM16REG16P0_INCREMENT ; check next letter
-	JMS TOUPPER_P1
-	FIM P7, 'S'		; 'E' continuous mode, 'ES' step mode
+	JMS TOUPPER_P1		; 'E' continuous mode
+	FIM P7, 'S'		; 'EV' view register mode
+	JMS CMP_P1P7 		; 'ES' step mode
+	JCN ZN, L6_VIEWREG	;
+	LDM 2			; step mode
+	JUN L6_SETMODE
+L6_VIEWREG:
+	FIM P7, 'V'		;
 	JMS CMP_P1P7 		; 
 	JCN ZN, L6_CONTINUOUS	;
-	LDM 1H			; step mode
+	LDM 1			; view PC mode
 	JUN L6_SETMODE
-L6_CONTINUOUS			; continuous mode
+L6_CONTINUOUS:
 	JMS DEC_REG16P0
-	LDM 0H
+	LDM 0			; continuous mode
 L6_SETMODE:
-	FIM P7, REG4_EMU_STEP
+	FIM P7, REG4_EMU_MODE
 	LD_REG4P7_ACC
 	JUN COMMAND_E
 
 L7:
-	if ENABLE_MEMTEST
+	if USE_MON_CMD_T
 	FIM P7, 'T'		; Test program memory
 	JMS CMP_P1P7
 	JCN ZN, L10
@@ -322,10 +330,12 @@ COMMAND_D:
 	JCN ZN, CMDD_L1
 	JUN COMMAND_DD
 CMDD_L1:
+	if USE_MON_CMD_DP
 	FIM P7, 'P'
 	JMS CMP_P1P7
 	JCN ZN, CMDD_L2
 	JUN COMMAND_DP
+	endif 			;  USE_MON_CMD_DP
 CMDD_L2:
 	FIM P7, 'L'
 	JMS CMP_P1P7
@@ -336,6 +346,7 @@ CMDD_L3:
 	JMS PRINTSTR_P0
 	JUN CMD_LOOP
 
+	if  USE_MON_CMD_DP
 ;;;---------------------------------------------------------------------------
 ;;; COMMAND_DP
 ;;; Dump Physical Memory
@@ -380,10 +391,8 @@ CMDDP_EXIT:
 
 	JUN CMD_LOOP		; return to command loop
 
-	NOP
-	NOP
-	NOP
-	NOP
+	endif  			; USE_MON_CMD_DP
+
 ;;;---------------------------------------------------------------------------
 ;;; COMMAND_DL
 ;;; Dump Logical Memory
@@ -578,9 +587,9 @@ CMDPMC_L1:
 	
 	JUN CMD_LOOP		; return to command loop
 
-;;;	org 0200H
+;;;  	org 0200H
 ;;;---------------------------------------------------------------------------
-;;; 8080 emulator main loop
+;;; 8080 emulator
 ;;;---------------------------------------------------------------------------
 COMMAND_E:
 	FIM P1, REG16_PC	; set start PC if designated
@@ -589,24 +598,75 @@ EMU_START:
 	FIM P0, lo(STR_EMU_MESSAGE)
 	JMS PRINTSTR_P0
 
-EMU_LOOP:
-	FIM P7, REG4_EMU_STEP
+	FIM P7, REG4_EMU_MODE
 	LD_ACC_REG4P7
-	JCN Z, EMU_EXEC
-	JMS EMU_PRINT_REGISTERS
-	JMS GETCHAR_P1
-	FIM P7, '.'
-	JMS CMP_P1P7
-	JCN Z, EMU_EXIT
-EMU_EXEC:
-	
+	JCN Z, EMU_LOOP	      	; continuous mode
+	JUN EMU_DEBUG 		; not continuous mode (view reg or step)
+
+;;;---------------------------------------------------------------------------
+;;; Continuous loop
+;;;---------------------------------------------------------------------------
+EMU_LOOP:	        ; loop for continuous mode
 	JMS EXEC_CODE	; call by subroutine consumes precious PC stack 
 			; but it can return here by BBL from various routines
 			; in contrast JUN consumes 2 bytes
+	JCN T, EMU_EXIT	; exit by TEST button
 	JUN EMU_LOOP
-
+	
 EMU_EXIT:
+	FIM CNT, loops(16, 16)
+EMU_EXIT_LOOP:			 ; check button keep on for a while
+	JCN TN, EMU_LOOP
+	ISZ CNT_J, EMU_EXIT_LOOP
+	ISZ CNT_I, EMU_EXIT_LOOP
+	
+	JCN T, $		  ; wait for TEST button released
+	FIM P0, lo(STR_EMU_STOP)
+	JMS PRINTSTR_P0
+	JUN EMU_PRINTREG_AND_EXIT ; jump to HLT
+	
+;;;---------------------------------------------------------------------------
+;;; Loop for Debug (view resistor or step)
+;;;---------------------------------------------------------------------------
+EMU_DEBUG:
+	DAC
+	JCN Z, EMU_VIEWREG
+	JUN EMU_STEP
+;;;---------------------------------------------------------------------------
+;;; Loop with Viewing Resister
+;;;---------------------------------------------------------------------------
+EMU_VIEWREG:			; MODE=1 (viw register)
+	FIM P0, lo(STR_EMU_REGHEADER)
+	JMS PRINTSTR_P0
+EMU_VIEWREG_LOOP:			; MODE=1 (viw register)
+ 	JMS PRINT_CR
+ 	JMS EMU_PRINT_REGISTERS_NO_HEADER
+	JCN T, EMU_VIEWREG_EXIT	  ; exit by TEST button
+	JMS EXEC_CODE
+	JUN EMU_VIEWREG_LOOP
+EMU_VIEWREG_EXIT:
+	JCN T, $		  ; wait for TEST button released
+ 	JMS PRINT_CRLF
 	JUN CMD_LOOP	; go back to monitor loop
+
+;;;---------------------------------------------------------------------------
+;;; Step Execution Loop
+;;;---------------------------------------------------------------------------
+EMU_STEP
+EMU_STEP_LOOP:			; MODE=2 (step)
+	JMS EMU_PRINT_REGISTERS
+	JMS PRINT_CRLF
+	JMS GETCHAR_P1
+	FIM P7, '.'
+	JMS CMP_P1P7
+	JCN Z, EMU_STEP_EXIT
+
+	JMS EXEC_CODE
+	JUN EMU_STEP_LOOP
+
+EMU_STEP_EXIT:
+	JUN CMD_LOOP	; go back to monitor loop
+
 
 ;;;---------------------------------------------------------------------------
 ;;; EXEC_CODE
@@ -769,11 +829,9 @@ CODE_80BF_ARITH_LOGIC:
 CODE_76H:			; HLT
 	FIM P0, lo(STR_EMU_HLT)
 	JMS PRINTSTR_P0
-	FIM P7, REG4_EMU_STEP
-	LD_ACC_REG4P7
-	JCN ZN, CODE_76H_EXIT
-	JMS EMU_PRINT_REGISTERS	; print registers if continuous mode
-CODE_76H_EXIT:
+EMU_PRINTREG_AND_EXIT:
+	JMS EMU_PRINT_REGISTERS
+	JMS PRINT_CRLF
 	JUN CMD_LOOP		; go back to monitor by HLT
 
 CODE_00H:			; NOP
@@ -1711,112 +1769,12 @@ GETFLAG_C_1:
 	BBL 1
 
 ;;;---------------------------------------------------------------------------
-;;; GETFLAG_P
-;;; Flag P is loded to ACC
-;;; ACC=FLAG_P
-;;; This routine is compiled if EMU_USE_FLAG_P, 
-;;; otherwise FLAG_P is always 0.
+;;; SETFLAG_P_P1
 ;;;---------------------------------------------------------------------------
-GETFLAG_P:
-	if EMU_USE_FLAG_P
-	FIM P7, REG4_FLAG_1P1C
-	SRC P7
-	RDM
-	RAL
-	RAL
-	JCN CN, GETFLAG_P_0
-	BBL 1
-GETFLAG_P_0:
-	endif 			; EMU_USE_FLAG_P
-	BBL 0
-	
-;;;---------------------------------------------------------------------------
-;;; SETFLAG_C_{CY, 0, 1}
-;;; 	Set FLAG_C = {CY, 0, 1}
-;;;---------------------------------------------------------------------------
-SETFLAG_C_CY:
-	JCN C, SETFLAG_C_1
-SETFLAG_C_0:
-	FIM P7, REG4_FLAG_1P1C
-	SRC P7
-	RDM
-	RAR
-	CLC
-	RAL
-	WRM
-	BBL 0
-SETFLAG_C_1:
-	FIM P7, REG4_FLAG_1P1C
-	SRC P7
-	RDM
-	RAR
-	STC
-	RAL
-	WRM
-	BBL 0
-
-;;;---------------------------------------------------------------------------
-;;; SETFLAG_ZSP_{REG8P0, REG8P1, P1}
-;;; 
-;;; Set flag Z and S according to the value of {REG8P0, REG8P1, P1}.
-;;; P flag is compiled if EMU_USE_FLAG_P (not implemented yet).
-;;;---------------------------------------------------------------------------
-SETFLAG_ZSP_REG8P0:
-	JMS LD_P1_REG8P0
-	JUN SETFLAG_ZSP_P1
-
-SETFLAG_ZSP_REG8P1:
-	JMS LD_P1_REG8P1
-
-SETFLAG_ZSP_P1:
-	LD P1_HI		; ACC=Sxxx
-	RAL			; CY=S
-	TCC			; ACC=000S, (CY=Z), (BH=00)
-	
-	XCH CNT_I		; I=BHxS, (CY=Z to be set), (BH=00)
-
-	;; set Z FLAG
-	JMS ISZEROORNOT_P1
-	RAR			; CY= (P1==0) ? 0 : 1
-	CMC			; CY= (P1==0) ? 1 : 0
-	LD CNT_I		; ACC=BHxS (CY=Z)
-	RAR			; ACC=ZBHx (CY=S)
-	RAR			; ACC=SZBH (BH=00)
-
-	FIM P7, REG4_FLAG_SZBH
-	SRC P7
-	WRM			; write back to REG16_FLAG_SZBH
-
-	if EMU_USE_FLAG_P
-	;; Set P flag
-;;; table implementation may be faster
-;;;              0123456789ABCDEF
-;;; 4bit table =(0110100110010110)
-;;; org 09D0H
-;;; PARITY4TABLE: (1 when EVEN)
-;;; data 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1
-;;; GETPARITY_R1:
-;;; FIN P2
-;;; LD P2_LO
-;;; XCH_R1
-;;; BBL 0
-;;; 
-;;; FIM P0, lo(PARITY4TABLE)
-;;; LD P1_H
-;;; XCH R1
-;;; JMS GETPARITY_R1
-;;; LD R1
-;;; XCH P1_H
-;;; LD P1_L
-;;; XCH R1
-;;; JMS GETPARITY_R1
-;;; LD R1
-;;; ADD P1_H
-;;; RAR       ; here CY=PARITY (1 when EVEN)
-	
+	if USE_EMU_FLAG_P
+SETFLAG_P_P1:
 	CLB
 	XCH CNT_I		; I=0
-	LD_P1_P2		; restore P1
 	LD P1_HI
 	RAL
 	JCN CN,PFLAG_CNT1
@@ -1867,8 +1825,95 @@ PFLAG_CNT8:
 	RAR
 	WRM			; FLAG=xPxC
 	
-	endif			; EMU_USE_FLAG_P
-	BBL 0	
+	BBL 0
+	endif 			; USE_EMU_FLAG_P
+
+;;;---------------------------------------------------------------------------
+;;; GETFLAG_P
+;;; Flag P is loded to ACC
+;;; ACC=FLAG_P
+;;; This routine is compiled if USE_EMU_FLAG_P, 
+;;; otherwise FLAG_P is always 0.
+;;; 
+;;; This routine is not properly implemented,
+;;; because the frag is set on demand
+;;;---------------------------------------------------------------------------
+GETFLAG_P:
+	if USE_EMU_FLAG_P
+
+	FIM P1, REG8_A
+	JMS LD_P1_REG8P1
+	JMS SETFLAG_P_P1
+
+	FIM P7, REG4_FLAG_1P1C
+	SRC P7
+	RDM
+	RAL
+	RAL
+	JCN CN, GETFLAG_P_0
+	BBL 1
+GETFLAG_P_0:
+	endif 			; USE_EMU_FLAG_P
+	BBL 0
+	
+;;;---------------------------------------------------------------------------
+;;; SETFLAG_C_{CY, 0, 1}
+;;; 	Set FLAG_C = {CY, 0, 1}
+;;;---------------------------------------------------------------------------
+SETFLAG_C_CY:
+	JCN C, SETFLAG_C_1
+SETFLAG_C_0:
+	FIM P7, REG4_FLAG_1P1C
+	SRC P7
+	RDM
+	RAR
+	CLC
+	RAL
+	WRM
+	BBL 0
+SETFLAG_C_1:
+	FIM P7, REG4_FLAG_1P1C
+	SRC P7
+	RDM
+	RAR
+	STC
+	RAL
+	WRM
+	BBL 0
+
+;;;---------------------------------------------------------------------------
+;;; SETFLAG_ZSP_{REG8P0, REG8P1, P1}
+;;; 
+;;; Set flag Z and S according to the value of {REG8P0, REG8P1, P1}.
+;;; 
+;;; P flag is compiled if USE_EMU_FLAG_P, but not implemented properly yet.
+;;; It is evaluated on demand (in the GETFLAG_P routine)
+;;;---------------------------------------------------------------------------
+SETFLAG_ZSP_REG8P0:
+	JMS LD_P1_REG8P0
+	JUN SETFLAG_ZSP_P1
+
+SETFLAG_ZSP_REG8P1:
+	JMS LD_P1_REG8P1
+
+SETFLAG_ZSP_P1:
+	LD P1_HI		; ACC=Sxxx
+	RAL			; CY=S
+	TCC			; ACC=000S, (CY=Z), (BH=00)
+	
+	XCH CNT_I		; I=BHxS, (CY=Z to be set), (BH=00)
+
+	;; set Z FLAG
+	JMS ISZEROORNOT_P1
+	RAR			; CY= (P1==0) ? 0 : 1
+	CMC			; CY= (P1==0) ? 1 : 0
+	LD CNT_I		; ACC=BHxS (CY=Z)
+	RAR			; ACC=ZBHx (CY=S)
+	RAR			; ACC=SZBH (BH=00)
+
+	FIM P7, REG4_FLAG_SZBH
+	SRC P7
+	WRM			; write back to REG16_FLAG_SZBH
 
 ;;;---------------------------------------------------------------------------
 ;;; Logical operators
@@ -1950,6 +1995,50 @@ AND_P1_P2:
 	BBL 0
 
 ;;;---------------------------------------------------------------------------
+;;; XOR_P1_P2
+;;; P1 = P1 ^ P2
+;;;---------------------------------------------------------------------------
+XOR_P1_P2:
+	LD P1_LO
+	XCH R6
+	LD P2_LO
+	XCH R7
+	JMS XOR_R6_R7
+	LD R6
+	XCH P1_LO
+	
+	LD P1_HI
+	XCH R6
+	LD P2_HI
+	XCH R7
+	JMS XOR_R6_R7
+	LD R6
+	XCH P1_HI
+	BBL 0
+
+;;;---------------------------------------------------------------------------
+;;; OR_P1_P2
+;;; P1 = P1 | P2
+;;;---------------------------------------------------------------------------
+OR_P1_P2:
+	LD P1_LO
+	XCH R6
+	LD P2_LO
+	XCH R7
+	JMS OR_R6_R7
+	LD R6
+	XCH P1_LO
+	
+	LD P1_HI
+	XCH R6
+	LD P2_HI
+	XCH R7
+	JMS OR_R6_R7
+	LD R6
+	XCH P1_HI
+	BBL 0
+
+;;;---------------------------------------------------------------------------
 ;;; XOR_R6_R7
 ;;; R6 = R6 ^ R7
 ;;;---------------------------------------------------------------------------
@@ -1997,50 +2086,6 @@ XOR67_L3:
 	RAR
 	XCH R6			; cmp R6.bit3
 XOR67_L4:
-	BBL 0
-
-;;;---------------------------------------------------------------------------
-;;; XOR_P1_P2
-;;; P1 = P1 ^ P2
-;;;---------------------------------------------------------------------------
-XOR_P1_P2:
-	LD P1_LO
-	XCH R6
-	LD P2_LO
-	XCH R7
-	JMS XOR_R6_R7
-	LD R6
-	XCH P1_LO
-	
-	LD P1_HI
-	XCH R6
-	LD P2_HI
-	XCH R7
-	JMS XOR_R6_R7
-	LD R6
-	XCH P1_HI
-	BBL 0
-
-;;;---------------------------------------------------------------------------
-;;; OR_P1_P2
-;;; P1 = P1 | P2
-;;;---------------------------------------------------------------------------
-OR_P1_P2:
-	LD P1_LO
-	XCH R6
-	LD P2_LO
-	XCH R7
-	JMS OR_R6_R7
-	LD R6
-	XCH P1_LO
-	
-	LD P1_HI
-	XCH R6
-	LD P2_HI
-	XCH R7
-	JMS OR_R6_R7
-	LD R6
-	XCH P1_HI
 	BBL 0
 
 ;;;---------------------------------------------------------------------------
@@ -2409,35 +2454,6 @@ LDREG16P6P7_LOOP:
 	BBL 0
 
 ;;;----------------------------------------------------------------------------
-;;; LD_P2P3_REG16P1
-;;; P2(R4R5) = REG16(P1).bitFEDCBA98
-;;; P3(R6R7) = REG16(P1).bit76543210
-;;; destroy: P7
-;;;----------------------------------------------------------------------------
-LD_P2P3_REG16P1:
-	LD_P7_P1
-	SRC P7
-	RDM
-	XCH P3_LO		; R7 = REG16(P1).bit3210
-
-	INC P7_LO
-	SRC P7
-	RDM
-	XCH P3_HI		; R6 = REG16(P1).bit7654
-	
-	INC P7_LO
-	SRC P7
-	RDM
-	XCH P2_LO		; R5 = REG16(P1).bitBA98
-
-	INC P7_LO
-	SRC P7
-	RDM
-	XCH P2_HI		; R4 = REG16(P1).bitFEDC
-
-	BBL 0
-
-;;;----------------------------------------------------------------------------
 ;;; INC_REG16P0
 ;;; REG16(P0) = REG16(P0)+1
 ;;; destroy: P7(R14, R15)
@@ -2566,6 +2582,35 @@ REG16_ADD_LOOP:
 	BBL 0
 
 ;;;----------------------------------------------------------------------------
+;;; LD_P2P3_REG16P1
+;;; P2(R4R5) = REG16(P1).bitFEDCBA98
+;;; P3(R6R7) = REG16(P1).bit76543210
+;;; destroy: P7
+;;;----------------------------------------------------------------------------
+LD_P2P3_REG16P1:
+	LD_P7_P1
+	SRC P7
+	RDM
+	XCH P3_LO		; R7 = REG16(P1).bit3210
+
+	INC P7_LO
+	SRC P7
+	RDM
+	XCH P3_HI		; R6 = REG16(P1).bit7654
+	
+	INC P7_LO
+	SRC P7
+	RDM
+	XCH P2_LO		; R5 = REG16(P1).bitBA98
+
+	INC P7_LO
+	SRC P7
+	RDM
+	XCH P2_HI		; R4 = REG16(P1).bitFEDC
+
+	BBL 0
+
+;;;----------------------------------------------------------------------------
 ;;; GETHEX_REG16P1_PM16REG16P0_INCREMENT
 ;;; Get a hexadecimal number from the string PM16REG16P0
 ;;; and increment the pointer
@@ -2603,9 +2648,10 @@ GETHEX_EXIT:
 ;;; EMU_PRINT_REGISTERS
 ;;;----------------------------------------------------------------------------
 EMU_PRINT_REGISTERS:
-	FIM P0, lo(STR_EMU_REG)
+	FIM P0, lo(STR_EMU_REGHEADER)
 	JMS PRINTSTR_P0
 
+EMU_PRINT_REGISTERS_NO_HEADER:
 	FIM P1, REG8_A
 	JMS LD_P1_REG8P1
 	JMS PRINTHEX_P1
@@ -2683,9 +2729,7 @@ EMU_PRINT_REGISTERS:
 	JMS DEC_REG16P0
 	JMS DEC_REG16P0
 	
-	JUN PRINT_CRLF
-;;;	BBL 0
-
+	BBL 0
 
 	
 ;;;----------------------------------------------------------------------------
@@ -2758,8 +2802,8 @@ EMU_IN_EXIT_TO_MONITOR:
 ;;; if ~test button is on then wait for the button released,
 ;;; and set flag to return "STOP" code on the next "IN URTRD" 
 EMU_IN_UARTRC:
-	JCN T, EMU_IN_UARTRC_EXIT
-	JCN TN, $
+	JCN TN, EMU_IN_UARTRC_EXIT ; jump if T==1(button is not pressed)
+	JCN T, $		   ; wait for button released
 	FIM P0, REG8_EMU_KEYBUF
 	FIM P1, EMU_IN_STOPCODE
 	JUN LD_REG8P0_P1
@@ -2770,7 +2814,6 @@ EMU_IN_UARTRC_EXIT:
 	JUN LD_REG8P0_P1
 ;;;	BBL 0
 
-
 ;;;---------------------------------------------------------------------------
 ;;; JIN_P2_CODE_80BF
 ;;; Jump table for CODE 80H to BFH
@@ -2780,14 +2823,14 @@ EMU_IN_UARTRC_EXIT:
 JIN_P2_CODE_80BF:
 	JIN P2
 	org 09F0H
-	JUN ADI_P1		; 9F0: 80H<=87H
-	JUN ACI_P1		; 9F2: 88H<=8FH
-	JUN SUI_P1		; 9F4: 90H<=97H
-	JUN SBI_P1		; 9F6: 98H<=9FH
-	JUN ANI_P1		; 9F8: A0H<=A7H
-	JUN XRI_P1		; 9FA: A8H<=AFH
-	JUN ORI_P1		; 9FC: B0H<=B7H
-	JUN CPI_P1		; 9FE: B8H<=BFH
+	JUN ADI_P1		; 9F0: 80H<=87H; ADD
+	JUN ACI_P1		; 9F2: 88H<=8FH; ADC
+	JUN SUI_P1		; 9F4: 90H<=97H; SUB
+	JUN SBI_P1		; 9F6: 98H<=9FH; SBB
+	JUN ANI_P1		; 9F8: A0H<=A7H; ANA
+	JUN XRI_P1		; 9FA: A8H<=AFH; XRA
+	JUN ORI_P1		; 9FC: B0H<=B7H; ORA
+	JUN CPI_P1		; 9FE: B8H<=BFH; CMP
 ;;;---------------------------------------------------------------------------
 ;;; Jump table for CODE 01H-3FH, C0H-FFH
 ;;;---------------------------------------------------------------------------
@@ -3639,7 +3682,7 @@ CMDDD_L2:
 ;;; Program Memory Test
 ;;; This command is optional
 ;;;---------------------------------------------------------------------------
-	if ENABLE_MEMTEST
+	if USE_MON_CMD_T
 COMMAND_T:
 	LDM loop(2)
 	XCH CNT_I
@@ -3714,7 +3757,7 @@ CMDT_ERROR:
 	JMS PRINT_CRLF
 
 	JUN CMD_LOOP
-	endif			; ENABLE_MEMTEST
+	endif			; USE_MON_CMD_T
 	
 ;;;----------------------------------------------------------------------------
 ;;; Print subroutine and string data located in Page E (0E00H-0EFFH)
@@ -3780,7 +3823,7 @@ STR_ERROR_UNKNOWN_MEMSPACE:
 STR_ERROR_LOADCOMMAND:
 	data "?LOAD ERROR\r\n", 0
 
-	if ENABLE_MEMTEST
+	if USE_MON_CMD_T
 STR_ERROR_MEMTEST:
 	data "MEMERR\r\n", 0
 	endif
@@ -3797,8 +3840,10 @@ STR_ERROR_MEMTEST:
 STR_EMU_MESSAGE:
 	data "\r\n8080 Emulator on 4004 Ver 1.0\r\n", 0
 
-STR_EMU_REG:
+STR_EMU_REGHEADER:
 	data "A  SZC  BC   DE   HL   SP   PC (+0 +1 +2)BC)DE)HL)SP +1)\r\n", 0
+STR_EMU_STOP:
+	data "\r\nSTOP\r\n", 0
 STR_EMU_HLT:
 	data "\r\nHLT\r\n", 0
 
