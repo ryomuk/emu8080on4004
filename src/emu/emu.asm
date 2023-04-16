@@ -3,7 +3,7 @@
 ;;; for Intel 4004 evaluation board
 ;;;
 ;;; by Ryo Mukai
-;;; 2023/04/14
+;;; 2023/04/16
 ;;;---------------------------------------------------------------------------
 
 ;;;---------------------------------------------------------------------------
@@ -607,6 +607,43 @@ EMU_START:
 ;;; Continuous loop
 ;;;---------------------------------------------------------------------------
 EMU_LOOP:	        ; loop for continuous mode
+
+;;;---------------------------------------------------------------------------
+;;; for debug
+;;;---------------------------------------------------------------------------
+DEBUG_TRACE = 0
+	if DEBUG_TRACE
+	FIM P0, REG16_PC
+	FIM P1, REG16_ADDR
+
+	FIM P2, up(197DH)
+	FIM P3, lo(197DH)
+	JMS LD_REG16P1_P2P3
+	JMS CMP_REG16P0_REG16P1
+	JCN NZ, DEBUG_TRACE_EXIT
+
+	FIM P0, REG16_BC
+	FIM P2, up(36FFH)
+	FIM P3, lo(36FFH)
+	JMS LD_REG16P1_P2P3
+	JMS CMP_REG16P0_REG16P1
+	JCN Z, DEBUG_TRACE_HLT
+	JUN DEBUG_TRACE_EXIT
+
+DEBUG_TRACE_PRINT:
+ 	JMS PRINT_CRLF
+ 	JMS EMU_PRINT_REGISTERS
+
+DEBUG_TRACE_HLT:
+	JUN EMU_PRINTREG_AND_EXIT ; jump to HLT
+
+DEBUG_TRACE_EXIT:
+	FIM P0, REG16_PC
+	endif 			; DEBUG_TRACE
+;;;---------------------------------------------------------------------------
+;;; end for debug
+;;;---------------------------------------------------------------------------
+
 	JMS EXEC_CODE	; call by subroutine consumes precious PC stack 
 			; but it can return here by BBL from various routines
 			; in contrast JUN consumes 2 bytes
@@ -1413,12 +1450,17 @@ CALL_P2P3:
 CODE_CEH:			; ACI B2
 	JMS LD_P1_PM16REG16P0_INCREMENT ; P1=PM(REG(PC)++)
 ACI_P1:
-	JMS GETFLAG_C
-	JCN Z, ACI_P1_NOCARRY
-	JMS INC_P1
-ACI_P1_NOCARRY:	
 	FIM P0, REG8_A
+	JMS GETFLAG_C
+	JCN CN, ACI_P1_NOCARRY
+	JMS INC_P1
+	JCN CN, ACI_P1_NOCARRY
 	JMS ADD_REG8P0_P1
+	STC
+	JUN ACI_P1_EXIT
+ACI_P1_NOCARRY:	
+	JMS ADD_REG8P0_P1
+ACI_P1_EXIT:	
 	JMS SETFLAG_C_CY
 	JUN SETFLAG_ZSP_REG8P0
 ;;;	BBL 0
@@ -1771,6 +1813,33 @@ GETFLAG_C_1:
 ;;;---------------------------------------------------------------------------
 ;;; SETFLAG_P_P1
 ;;;---------------------------------------------------------------------------
+;;; table implementation may be faster
+;;;              0123456789ABCDEF
+;;; 4bit table =(1001011001101001)
+;;; 	org 09C0H
+;;; PARITY4TABLE:  			; (1 when EVEN)
+;;; 	data 1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1
+;;;
+;;;GETPARITY_R1:
+;;;	FIN P2
+;;;	LD P2_LO
+;;;	XCH R1
+;;;	BBL 0
+;;;
+;;;	FIM P0, lo(PARITY4TABLE)
+;;;	LD P1_HI
+;;;	XCH R1
+;;;	JMS GETPARITY_R1
+;;;	LD R1
+;;;	XCH P1_HI
+;;;	LD P1_LO
+;;;	XCH R1	
+;;;	JMS GETPARITY_R1
+;;;	LD R1
+;;;	ADD P1_HI
+;;;	RAR       ; here CY=PARITY (1 when EVEN)
+;;;	BBL 0	
+
 	if USE_EMU_FLAG_P
 SETFLAG_P_P1:
 	CLB
@@ -1922,57 +1991,6 @@ SETFLAG_ZSP_P1:
 ;;;---------------------------------------------------------------------------
 
 ;;;---------------------------------------------------------------------------
-;;; AND_R6_R7
-;;; R6 = R6 & R7
-;;;---------------------------------------------------------------------------
-AND_R6_R7:
-	CLB
-	LD R7
-	RAR
-	JCN C, AND67_L1	; jump if R7.bit0==1
-	LD R6
-	RAR
-	CLC
-	RAL
-	XCH R6		; R6.bit0=0
-AND67_L1:
-	LD R7
-	RAR
-	RAR
-	JCN C, AND67_L2	; jump if R7.bit1==1
-	LD R6
-	RAR
-	RAR
-	CLC
-	RAL
-	RAL
-	XCH R6		; R6.bit1=0
-AND67_L2:
-	LD R7
-	RAL
-	RAL
-	JCN C, AND67_L3	; jump if R7.bit2==1
-	LD R6
-	RAL
-	RAL
-	CLC
-	RAR
-	RAR
-	XCH R6		; R6.bit2=0
-AND67_L3:
-	LD R7
-	RAL
-	JCN C, AND67_L4	; jump if R7.bit3==1
-	LD R6
-	RAL
-	CLC
-	RAR
-	XCH R6		; R6.bit3=0
-AND67_L4:
-	
-	BBL 0
-
-;;;---------------------------------------------------------------------------
 ;;; AND_P1_P2
 ;;; P1 = P1 & P2
 ;;;---------------------------------------------------------------------------
@@ -2036,6 +2054,57 @@ OR_P1_P2:
 	JMS OR_R6_R7
 	LD R6
 	XCH P1_HI
+	BBL 0
+
+;;;---------------------------------------------------------------------------
+;;; AND_R6_R7
+;;; R6 = R6 & R7
+;;;---------------------------------------------------------------------------
+AND_R6_R7:
+	CLB
+	LD R7
+	RAR
+	JCN C, AND67_L1	; jump if R7.bit0==1
+	LD R6
+	RAR
+	CLC
+	RAL
+	XCH R6		; R6.bit0=0
+AND67_L1:
+	LD R7
+	RAR
+	RAR
+	JCN C, AND67_L2	; jump if R7.bit1==1
+	LD R6
+	RAR
+	RAR
+	CLC
+	RAL
+	RAL
+	XCH R6		; R6.bit1=0
+AND67_L2:
+	LD R7
+	RAL
+	RAL
+	JCN C, AND67_L3	; jump if R7.bit2==1
+	LD R6
+	RAL
+	RAL
+	CLC
+	RAR
+	RAR
+	XCH R6		; R6.bit2=0
+AND67_L3:
+	LD R7
+	RAL
+	JCN C, AND67_L4	; jump if R7.bit3==1
+	LD R6
+	RAL
+	CLC
+	RAR
+	XCH R6		; R6.bit3=0
+AND67_L4:
+	
 	BBL 0
 
 ;;;---------------------------------------------------------------------------
@@ -2254,6 +2323,27 @@ REG8_INC_EXIT:
 	BBL 0
 
 ;;;----------------------------------------------------------------------------
+;;; DEC_REG8P1
+;;; REG8(P1) = REG16(P1)+1
+;;; destroy: P7(R14, R15)
+;;;----------------------------------------------------------------------------
+DEC_REG8P1:
+	LD_P7_P1
+	
+	SRC P7
+	RDM
+	DAC 
+	WRM			; REG(P0).lower--
+	JCN C, REG8_DEC_EXIT	; borrow=0 then exit
+	INC P7_LO
+	SRC P7
+	RDM
+	DAC 
+	WRM			; REG(P0).higher--
+REG8_DEC_EXIT:
+	BBL 0
+
+;;;----------------------------------------------------------------------------
 ;;; SUB_REG8P0_P1
 ;;; REG8(P0) = REG8(P0)-P1
 ;;; destroy: P7(R14, R15)
@@ -2275,27 +2365,6 @@ SUB_REG8P0_P1:
 	CMC
 
 	BBL 0	
-
-;;;----------------------------------------------------------------------------
-;;; DEC_REG8P1
-;;; REG8(P1) = REG16(P1)+1
-;;; destroy: P7(R14, R15)
-;;;----------------------------------------------------------------------------
-DEC_REG8P1:
-	LD_P7_P1
-	
-	SRC P7
-	RDM
-	DAC 
-	WRM			; REG(P0).lower--
-	JCN C, REG8_DEC_EXIT	; borrow=0 then exit
-	INC P7_LO
-	SRC P7
-	RDM
-	DAC 
-	WRM			; REG(P0).higher--
-REG8_DEC_EXIT:
-	BBL 0
 
 ;;;----------------------------------------------------------------------------
 ;;; LD_REG8P0_REG8P1
@@ -3324,16 +3393,9 @@ GETHEXZBYTE_1DIGIT_EXIT:
 ;;; GETCHAR_P1 and PUTCHAR_P1
 ;;; defined in separated file
 ;;;---------------------------------------------------------------------------
-;;; supported baudrates are 4800bps or 9600bps
-;; BAUDRATE equ 4800	; 4800 bps, 8 data bits, no parity, 1 stop bit
-BAUDRATE equ 9600   ; 9600 bps, 8 data bits, no parity, 1 stop bit
+;;; supported baudrate is 9600 bps, 8 data bits, no parity, 1 stop bit
 
-	switch BAUDRATE
-	case 4800
-	include "4800bps.inc"
-	case 9600
 	include "9600bps.inc"
-	endcase
 
 ;;;---------------------------------------------------------------------------
 ;;; INIT_SERIAL
@@ -3443,18 +3505,24 @@ PRINTACC_L1:
 ;;;----------------------------------------------------------------------------
 ;;; INC_P1
 ;;; P1=P1+1
+;;; CY=1 if overflow otherwise CY=0
 ;;;----------------------------------------------------------------------------
 INC_P1:	
+	CLB
 	INC P1_LO
 	LD P1_LO
 	JCN ZN, INC_P1_EXIT
 	INC P1_HI
+	LD P1_HI
+	JCN ZN, INC_P1_EXIT
+	STC
 INC_P1_EXIT:	
 	BBL 0
 
 ;;;----------------------------------------------------------------------------
 ;;; DEC_P1
 ;;; P1=P1-1
+;;; CY=1 if noborrow, CY=0 if borrow
 ;;;----------------------------------------------------------------------------
 DEC_P1:	
 	LD P1_LO
@@ -3505,9 +3573,6 @@ ISALPHA_FALSE:
 ;;;	    ACC=1 if P1 is a hex digit letter
 ;;; destroy: P7
 ;;;----------------------------------------------------------------------------
-	NOP
-	NOP
-	NOP
 ISHEX_P1:
 	FIM P7, '0'
 	JMS CMP_P1P7
@@ -3838,7 +3903,7 @@ STR_ERROR_MEMTEST:
 ;;; String data for Emulator
 ;;;----------------------------------------------------------------------------
 STR_EMU_MESSAGE:
-	data "\r\n8080 Emulator on 4004 Ver 1.0\r\n", 0
+	data "\r\n8080 Emulator on 4004 Ver 2.0\r\n", 0
 
 STR_EMU_REGHEADER:
 	data "A  SZC  BC   DE   HL   SP   PC (+0 +1 +2)BC)DE)HL)SP +1)\r\n", 0
