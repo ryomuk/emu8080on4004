@@ -75,6 +75,8 @@ Youtubeで関連動画を公開しています．
 ![](images/board_rev2_1.jpg)
 - ブレッドボード版とRev.2.1基板
 ![](images/two_boards.jpg)
+- 8K BASIC 起動画面
+![](images/8kbasic.jpg)
 
 ## 更新履歴
 - 2023/3/21: 初版公開
