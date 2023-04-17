@@ -10,7 +10,7 @@ If necessary, please use a translation service such as DeepL (I recommend this) 
 自作の4004実験用ボードと，その上で動作する8080エミュレータです．Palo Alot Tiny BASIC(4K整数型BASIC)や，Grant Searle's BASIC(8K浮動小数点BASIC)の8080移植版がほぼそのまま動くレベルの機能が実現できています．動作速度は8080実機の1/700程度です．
 
 ## 制限事項等
-- P(パリティ)フラグの実装は正確ではありません．JPOやJPE実行時にAレジスタの値から計算されます．
+- P(パリティ)フラグの実装は正確ではありません．{J,C,R}{PO,PE}実行時にAレジスタの値から計算されます．
 - DAA命令の実装は正確ではありません．
 - IN命令(コントロールレジスタ)はACC=0xFF(データあり)を返します．
 - IN命令(データレジスタ)は4004ボードのソフトウェアで実装されたUARTのGETCHARを呼ぶので，入力されるまで止まります．
