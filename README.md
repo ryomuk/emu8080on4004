@@ -49,7 +49,7 @@ Youtubeで関連動画を公開しています．
 
 ## ブログ
 関連する情報が書いてあるかも．
-- [Intel 4004 関連記事の目次@ブログの練習](https://blog.goo.ne.jp/tk-80/e/3fa1e2972737c7b7d1b83f4e7bd648a2)
+- [Intel 4004関連記事のまとめ](https://note.com/ryomuk/m/m2f55e2a1f586))
 
 ## 4004関連開発事例
 - [Intel 4004  50th Anniversary Project](https://www.4004.com/)
